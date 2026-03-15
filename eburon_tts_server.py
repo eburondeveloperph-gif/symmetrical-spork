@@ -30,14 +30,31 @@ OUTPUT_DIR = "/tmp/eburon_tts_outputs"
 
 _model = None
 
-# Language lexicon
+# Language lexicon - all Qwen3 supported + custom
 LANGUAGE_LEXICON = {
+    # Qwen3 native support
+    "auto": {"name": "Auto Detect", "sample": ""},
     "en": {"name": "English", "sample": "Hello! This is a test of Eburon TTS."},
+    "zh": {"name": "Chinese", "sample": "你好！这是Eburon TTS的测试。"},
+    "de": {"name": "German", "sample": "Hallo! Das ist ein Test von Eburon TTS."},
+    "it": {"name": "Italian", "sample": "Ciao! Questo è un test di Eburon TTS."},
+    "pt": {"name": "Portuguese", "sample": "Olá! Este é um teste do Eburon TTS."},
+    "es": {"name": "Spanish", "sample": "¡Hola! Esta es una prueba de Eburon TTS."},
+    "ja": {"name": "Japanese", "sample": "こんにちは！これはEburon TTSのテストです。"},
+    "ko": {"name": "Korean", "sample": "안녕하세요! 이것은 Eburon TTS 테스트입니다."},
+    "fr": {"name": "French", "sample": "Bonjour! C'est un test d'Eburon TTS."},
+    "ru": {"name": "Russian", "sample": "Привет! Это тест Eburon TTS."},
+    # Custom - requires training
     "nl": {
-        "name": "Dutch (Flemish)",
+        "name": "Dutch (Flemish) - Training",
         "sample": "Hallo! Dit is een test van Eburon TTS.",
+        "needs_training": True,
     },
-    "tl": {"name": "Tagalog", "sample": "Kamusta! Ito ay isang test ng Eburon TTS."},
+    "tl": {
+        "name": "Tagalog - Training",
+        "sample": "Kamusta! Ito ay isang test ng Eburon TTS.",
+        "needs_training": True,
+    },
 }
 
 # Voice presets
