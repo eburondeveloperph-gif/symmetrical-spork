@@ -1,6 +1,6 @@
 # Eburon TTS - Echo Model
 
-AI Text-to-Speech service powered by Qwen3 TTS with MLX acceleration for Apple Silicon.
+AI Text-to-Speech service powered by Eburon AI.
 
 ## Features
 
