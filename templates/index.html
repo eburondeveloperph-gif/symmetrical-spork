@@ -278,6 +278,42 @@
     .loading .btn-icon {
       animation: pulse 1s infinite;
     }
+    
+    .options-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .option-group {
+      flex: 1;
+    }
+    
+    .option-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.9rem;
+    }
+    
+    select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 15px;
+      font-family: inherit;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: var(--eburon-primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    }
   </style>
 </head>
 <body>
@@ -296,6 +332,28 @@
     <div class="input-group">
       <label for="text-input">Enter your text</label>
       <textarea id="text-input" placeholder="Type something here and click Generate...">Hello! Welcome to Eburon TTS Echo Model.</textarea>
+    </div>
+    
+    <div class="options-row">
+      <div class="option-group">
+        <label for="voice-select">Voice</label>
+        <select id="voice-select">
+          <option value="echo">Echo (Default)</option>
+          <option value="nova">Nova</option>
+          <option value="shell">Shell</option>
+          <option value="wave">Wave</option>
+          <option value="amber">Amber</option>
+          <option value="floyd">Floyd</option>
+        </select>
+      </div>
+      <div class="option-group">
+        <label for="language-select">Language</label>
+        <select id="language-select">
+          <option value="en">English</option>
+          <option value="nl">Dutch (Flemish)</option>
+          <option value="tl">Tagalog</option>
+        </select>
+      </div>
     </div>
     
     <div class="controls">
@@ -340,6 +398,8 @@
     const audioSection = document.getElementById('audio-section');
     const audioPlayer = document.getElementById('audio-player');
     const downloadLink = document.getElementById('download-link');
+    const voiceSelect = document.getElementById('voice-select');
+    const languageSelect = document.getElementById('language-select');
     
     let currentAudioPath = null;
     
@@ -360,6 +420,9 @@
         return;
       }
       
+      const voice = voiceSelect.value;
+      const language = languageSelect.value;
+      
       generateBtn.disabled = true;
       showStatus('<span>⚡</span> Generating speech...', 'loading');
       audioSection.classList.add('hidden');
@@ -368,7 +431,7 @@
         const response = await fetch('/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text })
+          body: JSON.stringify({ text, voice, language })
         });
         
         if (!response.ok) {
