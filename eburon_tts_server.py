@@ -50,15 +50,15 @@ VOICE_PRESETS = {
     "floyd": {"speed": 1.0, "pitch": 2},
 }
 
-# Emotion mappings for natural nuances - more explicit for TTS
+# Emotion mappings for natural nuances - more natural less extreme
 EMOTION_PROMPTS = {
-    "happy": "Speak with a bright, joyful tone, smiling voice, upbeat rhythm, higher pitch, energetic delivery",
-    "sad": "Speak slowly with a heavy heart, mournful tone, lower pitch, pauses of grief, melancholy delivery",
-    "angry": "FURIOUS rage, shouting voice, harsh consonants, rapid aggressive pace, bitter tone, maximum intensity",
-    "excited": "ECSTATIC excitement, animated voice, fast energetic pace, jumping rhythm, high enthusiasm",
-    "calm": "Peaceful gentle voice, relaxed slow tempo, soothing smooth delivery, meditative tone",
-    "surprised": "ASTONISHED shocked tone, wide eyed amazement, exclamations, sudden bursts, disbelief",
-    "scared": "TERRIFIED trembling voice, nervous stammers, hesitant shaking delivery, panic tone, fearful whispers",
+    "happy": "Happy and cheerful tone, gentle smile in voice, warm and friendly delivery",
+    "sad": "Sad and reflective tone, gentle slower pace, thoughtful melancholic delivery",
+    "angry": "Serious firm tone, strong conviction, determined delivery",
+    "excited": "Enthusiastic and energetic tone, upbeat delivery, positive energy",
+    "calm": "Peaceful gentle voice, relaxed tempo, soothing calm delivery",
+    "surprised": "Natural surprised reaction, conversational tone with mild exclamation",
+    "scared": "Nervous uncertain tone, hesitant delivery, quiet thoughtful speech",
 }
 
 # Style modifiers for prosody control
