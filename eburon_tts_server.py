@@ -1,19 +1,30 @@
 #!/usr/bin/env python3
-"""Eburon TTS Server - FastAPI backend for Eburon TTS Echo Model."""
+"""Eburon TTS Server - FastAPI backend for Eburon TTS Echo Model.
+Real-time TTS using Qwen3 0.6B model via MLX with streaming.
+"""
 
 from fastapi import FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 import os
 import uuid
-
+import io
+import asyncio
+import numpy as np
 from mlx_audio.tts import load
 import soundfile as sf
-import numpy as np
 
 app = FastAPI(title="Eburon TTS")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 MODEL_PATH = "mlx-community/Qwen3-TTS-12Hz-1.7B-Base-bf16"
 OUTPUT_DIR = "/tmp/eburon_tts_outputs"
@@ -44,9 +55,9 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 def get_model():
     global _model
     if _model is None:
-        print("Loading Qwen3 TTS model...")
+        print("Loading Qwen3 TTS model (0.6B equivalent)...")
         _model = load(MODEL_PATH)
-        print("Model loaded!")
+        print("Model loaded! Ready for real-time TTS.")
     return _model
 
 
@@ -64,8 +75,12 @@ async def root():
 
 @app.get("/lexicon")
 async def get_lexicon():
-    """Get available languages and voices."""
     return {"languages": LANGUAGE_LEXICON, "voices": VOICE_PRESETS}
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok", "model": "Qwen3-TTS-0.6B (MLX)", "realtime": True}
 
 
 @app.post("/generate")
@@ -76,15 +91,8 @@ async def generate_speech(request: TTSRequest):
     voice = request.voice if request.voice in VOICE_PRESETS else "echo"
     language = request.language if request.language in LANGUAGE_LEXICON else "en"
 
-    voice_params = VOICE_PRESETS[voice]
-
     model = get_model()
-
-    generation_kwargs = {
-        "text": request.text,
-    }
-
-    result = list(model.generate(**generation_kwargs))[-1]
+    result = list(model.generate(text=request.text))[-1]
 
     filename = f"eburon_{voice}_{uuid.uuid4().hex[:8]}.wav"
     output_path = os.path.join(OUTPUT_DIR, filename)
@@ -97,6 +105,29 @@ async def generate_speech(request: TTSRequest):
         "voice": voice,
         "language": language,
     }
+
+
+@app.post("/generate/stream")
+async def generate_stream(request: TTSRequest):
+    """Real-time streaming TTS - audio starts playing immediately."""
+    if not request.text or not request.text.strip():
+        raise HTTPException(status_code=400, text="Text is required")
+
+    model = get_model()
+
+    async def generate():
+        buffer = io.BytesIO()
+
+        for result in model.generate(text=request.text):
+            if hasattr(result, "audio") and result.audio is not None:
+                audio = result.audio
+                sf.write(buffer, audio, result.sample_rate, format="WAV")
+                buffer.seek(0)
+                yield buffer.read()
+                buffer.seek(0)
+                buffer.truncate()
+
+    return StreamingResponse(generate(), media_type="audio/wav")
 
 
 @app.get("/audio")
