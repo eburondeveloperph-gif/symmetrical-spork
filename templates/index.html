@@ -359,6 +359,21 @@
       color: white;
       border-color: var(--eburon-primary);
     }
+    
+    .sample-btn {
+      padding: 6px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    
+    .sample-btn:hover {
+      background: var(--eburon-light);
+      border-color: var(--eburon-primary);
+    }
   </style>
 </head>
 <body>
@@ -412,6 +427,18 @@
         <button class="emotion-chip" data-emotion="calm">Calm</button>
         <button class="emotion-chip" data-emotion="surprised">Surprised</button>
         <button class="emotion-chip" data-emotion="scared">Scared</button>
+      </div>
+      <div class="sample-texts" style="margin-top: 12px;">
+        <label style="font-size: 13px; color: #6b7280; margin-bottom: 8px; display: block;">Sample texts (click to use):</label>
+        <div class="emotion-row">
+          <button class="sample-btn" data-sample="Happy" data-text="I can't believe it! This is the best day of my life! Everything is going perfectly!">😊 Happy</button>
+          <button class="sample-btn" data-sample="Sad" data-text="I miss those days when we were together. Now everything feels so empty and cold.">😢 Sad</button>
+          <button class="sample-btn" data-sample="Angry" data-text="I am absolutely furious! This is completely unacceptable! How dare you do this to me!">😠 Angry</button>
+          <button class="sample-btn" data-sample="Excited" data-text="Wow! This is amazing! I never thought we'd actually pull this off! Let's celebrate!">🤩 Excited</button>
+          <button class="sample-btn" data-sample="Calm" data-text="Take a deep breath and relax. Everything will work out fine. There's no need to worry.">😌 Calm</button>
+          <button class="sample-btn" data-sample="Surprised" data-text="Wait, what? No way! I never expected this at all! This is incredible!">😲 Surprised</button>
+          <button class="sample-btn" data-sample="Scared" data-text="Did you hear that? Something's out there. Please, let's get out of here. I'm terrified.">😨 Scared</button>
+        </div>
       </div>
       <input type="text" id="style-input" class="style-input" placeholder="Style: warm, enthusiastic, slow, dramatic pauses...">
     </div>
@@ -472,6 +499,25 @@
         emotionChips.forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         selectedEmotion = chip.dataset.emotion;
+      });
+    });
+    
+    // Sample text button click handlers
+    const sampleButtons = document.querySelectorAll('.sample-btn');
+    sampleButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sampleText = btn.dataset.text;
+        const emotion = btn.dataset.sample.toLowerCase();
+        textInput.value = sampleText;
+        
+        // Set emotion chip
+        emotionChips.forEach(chip => {
+          if (chip.dataset.emotion === emotion) {
+            emotionChips.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            selectedEmotion = emotion;
+          }
+        });
       });
     });
     
