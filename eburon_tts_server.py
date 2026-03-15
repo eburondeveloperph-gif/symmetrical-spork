@@ -50,25 +50,25 @@ VOICE_PRESETS = {
     "floyd": {"speed": 1.0, "pitch": 2},
 }
 
-# Emotion mappings for natural nuances
+# Emotion mappings for natural nuances - more explicit for TTS
 EMOTION_PROMPTS = {
-    "happy": "Happy and cheerful tone, with upward inflections",
-    "sad": "Sad and melancholic tone, slower pace, lower pitch",
-    "angry": "Angry and frustrated tone, faster pace, harsh emphasis",
-    "excited": "Excited and enthusiastic tone, fast pace, high energy",
-    "calm": "Calm and soothing tone, relaxed pace, gentle delivery",
-    "surprised": "Surprised and amazed tone, with natural exclamation",
-    "scared": "Scared and nervous tone, hesitant, shaky delivery",
+    "happy": "Speak with a bright, joyful tone, smiling voice, upbeat rhythm, higher pitch, energetic delivery",
+    "sad": "Speak slowly with a heavy heart, mournful tone, lower pitch, pauses of grief, melancholy delivery",
+    "angry": "FURIOUS rage, shouting voice, harsh consonants, rapid aggressive pace, bitter tone, maximum intensity",
+    "excited": "ECSTATIC excitement, animated voice, fast energetic pace, jumping rhythm, high enthusiasm",
+    "calm": "Peaceful gentle voice, relaxed slow tempo, soothing smooth delivery, meditative tone",
+    "surprised": "ASTONISHED shocked tone, wide eyed amazement, exclamations, sudden bursts, disbelief",
+    "scared": "TERRIFIED trembling voice, nervous stammers, hesitant shaking delivery, panic tone, fearful whispers",
 }
 
 # Style modifiers for prosody control
 STYLE_MODIFIERS = {
-    "narrator": "Professional narrator voice, clear enunciation",
-    "news": "News anchor delivery, formal and authoritative",
-    "casual": "Casual conversation, relaxed and friendly",
-    "dramatic": "Dramatic storytelling, theatrical pauses",
-    "whisper": "Quiet whisper, intimate and soft",
-    "shout": "Loud and emphatic, strong projection",
+    "narrator": "Professional narrator voice, clear enunciation, storytelling mode",
+    "news": "News anchor delivery, formal authoritative, measured cadence",
+    "casual": "Casual conversation, relaxed informal, friendly chat",
+    "dramatic": "Dramatic theatrical delivery, exaggerated pauses, storytelling intensity",
+    "whisper": "Secretive whisper, hushed intimate voice, quiet conspiratorial",
+    "shout": "LOUD shouting, powerful projection, commanding roar",
 }
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
