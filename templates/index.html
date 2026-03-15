@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eburon TTS - Echo Model</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --eburon-primary: #6366f1;
+      --eburon-secondary: #8b5cf6;
+      --eburon-dark: #1e1b4b;
+      --eburon-light: #e0e7ff;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', Roboto, sans-serif;
+      background: linear-gradient(135deg, var(--eburon-dark) 0%, #312e81 50%, #1e1b4b 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 28px;
+      padding: 48px;
+      max-width: 640px;
+      width: 100%;
+      box-shadow: 
+        0 0 0 1px rgba(99, 102, 241, 0.1),
+        0 25px 50px rgba(0, 0, 0, 0.4),
+        0 0 100px rgba(99, 102, 241, 0.2);
+    }
+    
+    .logo {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    
+    .logo-icon {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, var(--eburon-primary) 0%, var(--eburon-secondary) 100%);
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+    }
+    
+    .logo-icon svg {
+      width: 40px;
+      height: 40px;
+      fill: white;
+    }
+    
+    .logo h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--eburon-primary) 0%, var(--eburon-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+      letter-spacing: -0.5px;
+    }
+    
+    .logo .tagline {
+      color: #6b7280;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    
+    .logo .model-badge {
+      display: inline-block;
+      background: var(--eburon-light);
+      color: var(--eburon-primary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 12px;
+      letter-spacing: 0.5px;
+    }
+    
+    .input-group {
+      margin-bottom: 24px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.95rem;
+    }
+    
+    textarea {
+      width: 100%;
+      padding: 18px;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      font-size: 17px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 140px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      line-height: 1.6;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: var(--eburon-primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    }
+    
+    textarea::placeholder {
+      color: #9ca3af;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    
+    button {
+      flex: 1;
+      padding: 16px 28px;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--eburon-primary) 0%, var(--eburon-secondary) 100%);
+      color: white;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+    
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+    
+    .btn-icon {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .status {
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .status.loading {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    .status.ready {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .status.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .status.hidden {
+      display: none;
+    }
+    
+    .audio-section {
+      background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+      border-radius: 20px;
+      padding: 28px;
+      text-align: center;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .audio-section h3 {
+      margin-bottom: 20px;
+      color: #374151;
+      font-size: 1.1rem;
+    }
+    
+    .audio-player {
+      width: 100%;
+      margin-bottom: 20px;
+      border-radius: 12px;
+    }
+    
+    .audio-player::-webkit-media-controls-panel {
+      background: #f9fafb;
+    }
+    
+    .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--eburon-primary);
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .download-link:hover {
+      background: var(--eburon-secondary);
+      transform: translateY(-1px);
+    }
+    
+    .audio-section.hidden {
+      display: none;
+    }
+    
+    .model-info {
+      text-align: center;
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid #e5e7eb;
+      color: #9ca3af;
+      font-size: 0.85rem;
+    }
+    
+    .model-info span {
+      color: var(--eburon-primary);
+      font-weight: 600;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .loading .btn-icon {
+      animation: pulse 1s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+      </div>
+      <h1>Eburon TTS</h1>
+      <p class="tagline">AI Text to Speech</p>
+      <span class="model-badge">ECHO MODEL</span>
+    </div>
+    
+    <div class="input-group">
+      <label for="text-input">Enter your text</label>
+      <textarea id="text-input" placeholder="Type something here and click Generate...">Hello! Welcome to Eburon TTS Echo Model.</textarea>
+    </div>
+    
+    <div class="controls">
+      <button id="generate-btn" class="btn-primary">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+        </svg>
+        Generate Speech
+      </button>
+      <button id="clear-btn" class="btn-secondary">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+        Clear
+      </button>
+    </div>
+    
+    <div id="status" class="status hidden"></div>
+    
+    <div id="audio-section" class="audio-section hidden">
+      <h3>🎧 Generated Audio</h3>
+      <audio id="audio-player" class="audio-player" controls></audio>
+      <br>
+      <a id="download-link" class="download-link" download="eburon-tts.wav">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+        </svg>
+        Download WAV
+      </a>
+    </div>
+    
+    <div class="model-info">
+      Powered by <span>Qwen3 TTS</span> • MLX Accelerated • Apple Silicon
+    </div>
+  </div>
+
+  <script>
+    const textInput = document.getElementById('text-input');
+    const generateBtn = document.getElementById('generate-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const status = document.getElementById('status');
+    const audioSection = document.getElementById('audio-section');
+    const audioPlayer = document.getElementById('audio-player');
+    const downloadLink = document.getElementById('download-link');
+    
+    let currentAudioPath = null;
+    
+    function showStatus(message, type) {
+      status.innerHTML = message;
+      status.className = `status ${type}`;
+      status.classList.remove('hidden');
+    }
+    
+    function hideStatus() {
+      status.classList.add('hidden');
+    }
+    
+    async function generate() {
+      const text = textInput.value.trim();
+      if (!text) {
+        showStatus('Please enter some text', 'error');
+        return;
+      }
+      
+      generateBtn.disabled = true;
+      showStatus('<span>⚡</span> Generating speech...', 'loading');
+      audioSection.classList.add('hidden');
+      
+      try {
+        const response = await fetch('/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        
+        if (!response.ok) {
+          const err = await response.text();
+          throw new Error(err || 'Generation failed');
+        }
+        
+        const data = await response.json();
+        currentAudioPath = data.path;
+        
+        audioPlayer.src = '/audio?path=' + encodeURIComponent(currentAudioPath);
+        downloadLink.href = '/audio?path=' + encodeURIComponent(currentAudioPath);
+        
+        audioSection.classList.remove('hidden');
+        showStatus('<span>✓</span> Speech generated successfully!', 'ready');
+        
+        audioPlayer.play();
+      } catch (error) {
+        showStatus('<span>✕</span> Error: ' + error.message, 'error');
+      } finally {
+        generateBtn.disabled = false;
+      }
+    }
+    
+    generateBtn.addEventListener('click', generate);
+    
+    clearBtn.addEventListener('click', () => {
+      textInput.value = '';
+      audioSection.classList.add('hidden');
+      hideStatus();
+      currentAudioPath = null;
+    });
+    
+    textInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        generate();
+      }
+    });
+  </script>
+</body>
+</html>
