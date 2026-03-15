@@ -25,7 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MODEL_PATH = "mlx-community/Qwen3-TTS-12Hz-1.7B-Base-bf16"
+MODEL_PATH = "mlx-community/Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16"
 OUTPUT_DIR = "/tmp/eburon_tts_outputs"
 
 _model = None
@@ -173,7 +173,17 @@ async def generate_speech(request: TTSRequest):
         final_text = f"[{nuance_prompt}] {enhanced_text}"
 
     model = get_model()
-    result = list(model.generate(text=final_text))[-1]
+
+    # Use generate_voice_design with instruct for emotion/style control
+    generation_kwargs = {"text": request.text}
+
+    if emotion or style:
+        instruct = build_nuance_prompt(emotion, style)
+        generation_kwargs["instruct"] = instruct
+        result = list(model.generate_voice_design(**generation_kwargs))[-1]
+    else:
+        # Use regular generate when no emotion/style
+        result = list(model.generate(**generation_kwargs))[-1]
 
     filename = f"eburon_{voice}_{emotion}_{uuid.uuid4().hex[:8]}.wav"
     output_path = os.path.join(OUTPUT_DIR, filename)
@@ -196,26 +206,34 @@ async def generate_stream(request: TTSRequest):
     if not request.text or not request.text.strip():
         raise HTTPException(status_code=400, text="Text is required")
 
-    nuance_prompt = build_nuance_prompt(request.emotion, request.style)
-    enhanced_text = enhance_text_with_nuances(
-        request.text, request.emotion, request.style
-    )
-    final_text = (
-        f"[{nuance_prompt}] {enhanced_text}" if nuance_prompt else enhanced_text
-    )
-
     model = get_model()
+
+    generation_kwargs = {"text": request.text}
+
+    if request.emotion or request.style:
+        instruct = build_nuance_prompt(request.emotion, request.style)
+        generation_kwargs["instruct"] = instruct
 
     async def generate():
         buffer = io.BytesIO()
-        for result in model.generate(text=final_text):
-            if hasattr(result, "audio") and result.audio is not None:
-                audio = result.audio
-                sf.write(buffer, audio, result.sample_rate, format="WAV")
-                buffer.seek(0)
-                yield buffer.read()
-                buffer.seek(0)
-                buffer.truncate()
+        if request.emotion or request.style:
+            for result in model.generate_voice_design(**generation_kwargs):
+                if hasattr(result, "audio") and result.audio is not None:
+                    audio = result.audio
+                    sf.write(buffer, audio, result.sample_rate, format="WAV")
+                    buffer.seek(0)
+                    yield buffer.read()
+                    buffer.seek(0)
+                    buffer.truncate()
+        else:
+            for result in model.generate(**generation_kwargs):
+                if hasattr(result, "audio") and result.audio is not None:
+                    audio = result.audio
+                    sf.write(buffer, audio, result.sample_rate, format="WAV")
+                    buffer.seek(0)
+                    yield buffer.read()
+                    buffer.seek(0)
+                    buffer.truncate()
 
     return StreamingResponse(generate(), media_type="audio/wav")
 
