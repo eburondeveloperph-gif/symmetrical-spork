@@ -1,0 +1,90 @@
+# Itawit Lexicon for Echobox TTS
+# Based on JW.org Itawit publications and native speaker sources
+# Language: Itawit (ISO: itv)
+
+# Correct Itawit Greetings & Common Phrases
+ma_ngo = Hello
+mabbalat = Thank you
+oon = Yes
+awan = No
+napia = Good/Well
+napia_nga_algaw = Good day
+napia_nga_mataruk = Good morning
+napia_nga_giram = Good afternoon
+napia_nga_gabi = Good night
+napia_nga_akaturug = Good night (for sleeping)
+kunnasi_ka = How are you?
+minya_ka = How are you?
+inia_ko = I don't know
+ammuk = I know
+marik_ammuk = I don't know
+baka = Maybe
+siguru = Definitely
+pay_e = Please
+innam_mu_ikau = Take care
+ay_ayatan_ta_ka = I love you
+anna_yo_ngahan_mu = What is your name?
+yo_ngahan_ku_e = My name is...
+napia_nga_nakilala = Nice to meet you
+marik_kuru_nga_napia = I am not doing well
+
+# Bible Terms from JW.org Itawit
+biblia = Bible
+jehova = Jehovah
+dios = God
+kristiano = Christian
+saksi = Witness
+kongregasion = Congregation
+mangangampet = Prayer
+sarita = Word/Story
+baluan = Verse
+kaagian = Church/Meeting place
+
+# JW.org Publication Terms
+balita = News/Message
+attolay = People
+mannanayun = Mankind
+mappagilammu = Knowledge
+paggilammu = Understanding
+nakakkasta = Good News
+
+# Time
+algaw = Day
+bigat = Morning
+giram = Afternoon
+gabi = Night
+tugpet = Noon
+sabado = Saturday
+domingo = Sunday
+bulan = Month
+tawen = Year
+
+# Family
+famillia = Family
+ama = Father
+ina = Mother
+anak = Child
+kabsat = Sibling
+lalaki = Male/Man
+babai = Female/Woman
+
+# Numbers
+isa = One
+duwa = Two
+tallo = Three
+uppat = Four
+lima = Five
+unnam = Six
+pito = Seven
+walo = Eight
+siam = Nine
+sapol = Ten
+
+# Sample sentences from JW.org Itawit publications
+sample_1 = Ma-ngo! Mabbalat.
+sample_2 = Kunnasi ka? Napia nak.
+sample_3 = Anna yo ngahan mu? Yo ngahan ku e Maria.
+sample_4 = Ay-ayatan ta ka.
+sample_5 = Ti biblian ti kasisirinan na.
+sample_6 = Ti mappagilammu ket importanti para ittayo.
+sample_7 = Nakakkasta nga Balita nga Naggafu kan Dios!

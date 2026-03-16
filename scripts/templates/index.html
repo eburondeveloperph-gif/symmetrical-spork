@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eburon AI TTS Echo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #000000;
+      --bg-secondary: #0a0a0a;
+      --bg-tertiary: #141414;
+      --bg-card: #0d0d0d;
+      --border-color: #1f1f1f;
+      --text-primary: #ffffff;
+      --text-secondary: #a1a1a1;
+      --text-muted: #525252;
+      --accent: #32cd32;
+      --accent-hover: #228b22;
+      --success: #32cd32;
+      --error: #ff4444;
+      --gradient-start: #32cd32;
+      --gradient-end: #7fff00;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 240px;
+      height: 100vh;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      z-index: 50;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      margin-bottom: 30px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent), #6366f1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 4px;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--accent);
+    }
+
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 240px;
+      padding: 30px;
+      min-height: 100vh;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      backdrop-filter: blur(10px);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    /* Inputs */
+    .input, .textarea, .select {
+      width: 100%;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .input:focus, .textarea:focus, .select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    .textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #6366f1);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--accent-hover), #4f46e5);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card);
+      border-color: var(--accent);
+    }
+
+    .btn-icon {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: var(--bg-tertiary);
+      color: var(--accent);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Voice Cards */
+    .voice-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .voice-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .voice-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .voice-card.selected {
+      border-color: var(--accent);
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .voice-card-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .voice-card-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .voice-card-info {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Emotion Chips */
+    .emotion-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .emotion-chip {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .emotion-chip:hover {
+      border-color: var(--accent);
+    }
+
+    .emotion-chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    /* Audio Player */
+    .audio-player {
+      width: 100%;
+      margin-top: 16px;
+    }
+
+    /* Status */
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      margin-top: 16px;
+    }
+
+    .status.loading {
+      background: rgba(139, 92, 246, 0.1);
+      color: var(--accent);
+    }
+
+    .status.success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .status.error {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    /* Upload Area */
+    .upload-area {
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .upload-area:hover {
+      border-color: var(--accent);
+      background: rgba(139, 92, 246, 0.05);
+    }
+
+    /* History Table */
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .history-table th,
+    .history-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .history-table th {
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .history-table tr:hover {
+      background: var(--bg-tertiary);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* Animations */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .animate-pulse {
+      animation: pulse 2s infinite;
+    }
+
+    /* Page */
+    .page {
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Hidden */
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon" style="background: transparent; padding: 0;">
+        <svg width="36" height="36" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0 C2.96333712 0.19089374 5.9268424 0.37865038 8.890625 0.5625 C9.58788696 0.60624756 10.28514893 0.64999512 11.00354004 0.69506836 C14.75388851 0.91927275 18.47776365 1.04157515 22.234375 1 C23.39453125 1 24.5546875 1 25.75 1 C26.08 1.33 26.41 1.66 26.75 2 C29.12688151 2.40602589 31.48515942 2.7546484 33.875 3.0625 C35.17695312 3.23910156 36.47890625 3.41570312 37.8203125 3.59765625 C41.49870773 3.97427127 45.05598965 4.07196124 48.75 4 C48.75 4.66 48.75 5.32 48.75 6 C49.32250488 6.03665771 49.89500977 6.07331543 50.48486328 6.11108398 C57.74320573 6.69373918 64.58032823 8.26802392 71.625 10.0625 C73.82968031 10.62004936 76.03537383 11.17361164 78.2421875 11.72265625 C79.20495605 11.96765869 80.16772461 12.21266113 81.15966797 12.46508789 C83.96206017 13.13482418 83.96206017 13.13482418 87.75 13 C87.75 13.66 87.75 14.32 87.75 15 C88.3493335 15.10449463 88.94866699 15.20898926 89.56616211 15.31665039 C96.02736265 16.51613224 102.11798392 18.25741365 108.3125 20.4375 C109.30064697 20.78458008 110.28879395 21.13166016 111.30688477 21.48925781 C130.66320363 28.44274959 149.11110773 37.44258994 167.37597656 46.84594727 C169.75518002 48.0509851 169.75518002 48.0509851 172.36621094 48.96459961 C174.82347214 50.03191267 175.94798483 51.07044141 177.75 53 C178.97075355 53.82152186 180.21961198 54.60225992 181.48828125 55.34765625 C182.21869629 55.78263428 182.94911133 56.2176123 183.70166016 56.66577148 C184.4807373 57.12669189 185.25981445 57.5876123 186.0625 58.0625 C194.26783716 63.0019132 202.0630249 68.2962855 209.75 74 C211.07154475 74.96884526 212.39316193 75.93759173 213.71484375 76.90625 C225.1890521 85.36525788 236.01788313 94.39609156 246.53125 104.02734375 C248.87196479 106.10843701 251.30194039 108.04714331 253.75 110 C256.5625 112.625 256.5625 112.625 258.75 115 C258.75 115.66 258.75 116.32 258.75 117 C260.07 117.66 261.39 118.32 262.75 119 C262.75 119.66 262.75 120.32 262.75 121 C263.41 121 264.07 121 264.75 121 C266.16015625 122.3984375 266.16015625 122.3984375 267.8125 124.375 C270.49937105 127.54484167 273.24398472 130.63410845 276.0625 133.6875 C281.32134281 139.52472653 286.04980919 145.71496306 290.75 152 C291.41153076 152.87615967 291.41153076 152.87615967 292.08642578 153.77001953 C342.13759684 220.12614865 369.35333299 301.39631523 369.0625 384.4375 C369.05976578 386.06984589 369.05976578 386.06984589 369.05697632 387.73516846 C368.89657113 444.8780809 356.70669401 500.13289131 332.75 552 C332.04234719 553.56482323 331.33529187 555.12991683 330.62890625 556.6953125 C326.80051861 565.0944958 322.61353491 573.19818094 317.87011719 581.12646484 C317.08703717 582.43626346 316.30948323 583.74937466 315.53613281 585.06494141 C308.58837413 596.87719271 300.9579931 608.03051308 292.75 619 C292.30269531 619.60183105 291.85539063 620.20366211 291.39453125 620.82373047 C282.3519285 632.95820777 272.43748839 644.31446559 262.125 655.37890625 C259.70857833 657.97570971 259.70857833 657.97570971 257.5625 660.83984375 C256.964375 661.55269531 256.36625 662.26554688 255.75 663 C255.09 663 254.43 663 253.75 663 C253.48372803 663.59530518 253.21745605 664.19061035 252.94311523 664.80395508 C251.72164435 667.05219133 250.52655914 668.40533574 248.66015625 670.13671875 C248.04664307 670.70914307 247.43312988 671.28156738 246.80102539 671.87133789 C246.14481201 672.47067139 245.48859863 673.07000488 244.8125 673.6875 C244.13372803 674.31325928 243.45495605 674.93901855 242.75561523 675.58374023 C238.18317703 679.76861963 233.51937143 683.80287914 228.671875 687.66796875 C226.45175013 689.43991333 224.25960434 691.23232245 222.078125 693.05078125 C212.9800678 700.60647118 203.63190199 707.50827101 193.75 714 C192.94884766 714.53206055 192.14769531 715.06412109 191.32226562 715.61230469 C139.37362954 750 139.37362954 750 125.75 750 C125.42 750.99 125.09 751.98 124.75 753 C123.83992187 753.07734375 122.92984375 753.1546875 121.9921875 753.234375 C116.36456454 754.0419516 111.17009463 756.25888756 105.875 758.25 C96.92253857 761.55382995 87.97594104 764.56328827 78.78515625 767.125 C75.86278661 767.86779393 75.86278661 767.86779393 73.75 769 C72.13046449 769.30179536 70.50381425 769.56564005 68.875 769.8125 C65.14678412 770.40185497 61.45403545 771.04578002 57.7734375 771.87890625 C-13.33307062 787.7438759 -89.77719854 780.73050781 -157.85009766 755.86474609 C-162.92610226 754.03573202 -167.99901913 752.25555741 -173.25 751 C-172.92 750.34 -172.59 749.68 -172.25 749 C-172.98468506 748.87415527 -173.71937012 748.74831055 -174.47631836 748.61865234 C-177.10562627 748.03220166 -179.20247208 747.2497786 -181.62890625 746.1015625 C-182.45745117 745.7104126 -183.28599609 745.3192627 -184.13964844 744.91625977 C-185.02168945 744.49014404 -185.90373047 744.06402832 -186.8125 743.625 C-187.73708008 743.18019287 -188.66166016 742.73538574 -189.61425781 742.27709961 C-203.60411009 735.47112917 -217.13095592 728.03515345 -230.04785156 719.35180664 C-233.35824856 716.86851223 -233.35824856 716.86851223 -237.25 716 C-238.91666667 714.33333333 -240.58333333 712.66666667 -242.25 711 C-244.23809244 709.64897586 -246.23939767 708.31729118 -248.25 707 C-260.79364768 698.06084878 -272.26278371 687.92533748 -283.5546875 677.4765625 C-286.53414152 674.73891924 -289.57115014 672.0778241 -292.63671875 669.4375 C-294.25 668 -294.25 668 -296.5625 665.5625 C-298.23358097 663.66029598 -298.23358097 663.66029598 -301.25 664 C-301.31574219 663.45085938 -301.38148438 662.90171875 -301.44921875 662.3359375 C-302.59081681 659.00581242 -304.63354477 657.16167714 -307.0625 654.625 C-308.06826651 653.55643538 -309.0721016 652.48605029 -310.07421875 651.4140625 C-310.59677246 650.8562207 -311.11932617 650.29837891 -311.65771484 649.72363281 C-322.95204019 637.49763818 -332.76256807 624.24869949 -342.265625 610.61010742 C-342.99845703 609.56173706 -342.99845703 609.56173706 -343.74609375 608.4921875 C-344.39856079 607.55415283 -344.39856079 607.55415283 -345.06420898 606.59716797 C-346.2965732 604.85593948 -346.2965732 604.85593948 -348.25 603 C-349.04175823 601.51093891 -349.8102482 600.00940427 -350.5625 598.5 C-352.56702168 594.78246992 -352.56702168 594.78246992 -356.0625 592.4375 C-356.784375 592.293125 -357.50625 592.14875 -358.25 592 C-357.93083618 591.15791992 -357.93083618 591.15791992 -357.60522461 590.29882812 C-357.12610381 587.19820855 -358.02431996 585.92473986 -359.56640625 583.21875 C-360.08090332 582.29932617 -360.59540039 581.37990234 -361.12548828 580.43261719 C-361.96055908 578.98097168 -361.96055908 578.98097168 -362.8125 577.5 C-363.92742252 575.51654668 -365.04071797 573.53217785 -366.15234375 571.546875 C-366.68972168 570.59232422 -367.22709961 569.63777344 -367.78076172 568.65429688 C-370.06663591 564.52468168 -372.1324511 560.30710254 -374.1640625 556.046875 C-375.19785646 553.85664483 -375.19785646 553.85664483 -377.25 552 C-377.95656655 550.01374519 -378.61741325 548.01103915 -379.25 546 C-380.04417265 543.92151566 -380.85359837 541.84881443 -381.67578125 539.78125 C-382.14306641 538.60046875 -382.61035156 537.4196875 -383.09179688 536.203125 C-384.05994897 533.76538746 -385.02868362 531.32788118 -385.99804688 528.890625 C-389.25794569 520.6494581 -392.32164686 512.36352376 -395.25 504 C-395.91 504 -396.57 504 -397.25 504 C-397.20875 503.00484375 -397.1675 502.0096875 -397.125 500.984375 C-397.25544026 496.8265916 -398.07719854 493.20424278 -399.25 489.25 C-401.25 482.34459459 -401.25 482.34459459 -401.25 479 C-401.91 478.67 -402.57 478.34 -403.25 478 C-403.51353375 476.16390421 -403.76262432 474.32489591 -403.95019531 472.47949219 C-404.27862269 469.76328007 -404.78610224 467.12541858 -405.3359375 464.4453125 C-407.94326654 451.66625639 -410.03266659 439.00580622 -411.26123047 426.01416016 C-411.3645166 424.97694824 -411.46780273 423.93973633 -411.57421875 422.87109375 C-411.65760498 421.95255615 -411.74099121 421.03401855 -411.8269043 420.08764648 C-411.96652588 419.39872314 -412.10614746 418.7097998 -412.25 418 C-412.91 417.67 -413.57 417.34 -414.25 417 C-413.59 417 -412.93 417 -412.25 417 C-412.31928711 416.26096436 -412.38857422 415.52192871 -412.45996094 414.76049805 C-413.262698 405.43974941 -413.49169997 396.160534 -413.5 386.8125 C-413.50100708 386.01608093 -413.50201416 385.21966187 -413.50305176 384.39910889 C-413.48316694 360.82565899 -411.54926403 337.48060124 -407.01953125 314.32421875 C-406.54848975 311.90121366 -406.25197347 309.93238282 -406.32421875 307.45703125 C-406.22580547 304.19903362 -405.16568346 301.53874243 -404.08740234 298.47949219 C-402.66243428 294.26025729 -401.62832943 289.94627822 -400.5625 285.625 C-400.33755859 284.73683594 -400.11261719 283.84867187 -399.88085938 282.93359375 C-399.66880859 282.08152344 -399.45675781 281.22945313 -399.23828125 280.3515625 C-399.04790283 279.58666504 -398.85752441 278.82176758 -398.66137695 278.03369141 C-398.15086734 275.85573933 -398.15086734 275.85573933 -398.25 273 C-397.59 273 -396.93 273 -396.25 273 C-396.15710693 272.42459473 -396.06421387 271.84918945 -395.96850586 271.25634766 C-394.66861142 263.98643442 -392.40849664 257.27646658 -389.8125 250.375 C-389.37147949 249.19784424 -388.93045898 248.02068848 -388.47607422 246.80786133 C-375.20329387 211.95687821 -356.88977314 178.92648605 -333.25 150 C-332.52039063 149.08089844 -331.79078125 148.16179687 -331.0390625 147.21484375 C-326.19471847 141.17216199 -321.07071442 135.44525446 -315.8046875 129.7734375 C-313.73748759 127.52922965 -311.7296492 125.25814141 -309.75 122.9375 C-302.87006121 115.018146 -295.24747855 107.77586777 -287.25 101 C-285.78837312 99.75385275 -284.33000913 98.50386783 -282.875 97.25 C-282.22789062 96.69828125 -281.58078125 96.1465625 -280.9140625 95.578125 C-279.02599482 93.90452414 -279.02599482 93.90452414 -277.25 91 C-275.93563383 90.29667661 -274.60007835 89.63206857 -273.25 89 C-272.03653658 88.12839937 -270.84786619 87.22145257 -269.68359375 86.28515625 C-269.03326172 85.76373047 -268.38292969 85.24230469 -267.71289062 84.70507812 C-267.04451172 84.16302734 -266.37613281 83.62097656 -265.6875 83.0625 C-265.01525391 82.52431641 -264.34300781 81.98613281 -263.65039062 81.43164062 C-260.03355616 78.53815034 -260.03355616 78.53815034 -256.65087891 75.38134766 C-254.99102019 73.74463092 -253.343002 73.02181042 -251.25 72 C-249.42279163 70.75040679 -247.61251469 69.47595673 -245.8125 68.1875 C-187.15645143 27.12486959 -117.92340409 4.07188268 -46.625 -0.1875 C-45.54564682 -0.25209412 -45.54564682 -0.25209412 -44.44448853 -0.31799316 C-29.5420217 -1.18717045 -14.88369306 -0.96799226 0 0 Z" fill="#ffffff" transform="translate(534.25,119)"/>
+          <path d="M0 0 C3.4901937 1.8136354 6.40455924 4.11034006 9.39697266 6.65185547 C11.16727916 8.14068162 12.97543401 9.57315812 14.79296875 11.00390625 C23.56563714 17.94906797 31.94675201 25.23419691 40 33 C40.87833496 33.84546387 40.87833496 33.84546387 41.77441406 34.70800781 C49.39823944 42.08734921 56.44570067 49.64073011 63 58 C63.95203486 59.16471991 64.90661713 60.32736067 65.86328125 61.48828125 C81.46662783 80.50790791 94.09738615 101.48334233 104 124 C104.52078125 125.14855469 105.0415625 126.29710937 105.578125 127.48046875 C116.96213473 153.99322825 123.95873177 186.20629391 122.71875 215.06640625 C121.65276421 229.29549493 121.65276421 229.29549493 125.53417969 242.53857422 C129.36887719 246.43449472 133.94123459 248.7488995 138.88378906 250.97607422 C141.88035464 252.42595839 144.24111022 254.39234757 146.75 256.5625 C147.61625 257.29339844 148.4825 258.02429687 149.375 258.77734375 C150.24125 259.51082031 151.1075 260.24429687 152 261 C153.36125 262.08474609 153.36125 262.08474609 154.75 263.19140625 C162.53095974 269.50330458 169.65473468 276.4389908 176.75 283.5 C177.4844635 284.22669891 177.4844635 284.22669891 178.23376465 284.96807861 C184.94948612 291.62780291 191.16788079 298.54866176 197 306 C197.51240234 306.65307129 198.02480469 307.30614258 198.55273438 307.97900391 C206.15550311 317.83005149 212.77456359 328.23518288 219 339 C219.39960937 339.68787598 219.79921875 340.37575195 220.2109375 341.08447266 C238.3594031 372.71487307 249.78145316 411.7139775 250.3125 448.25 C250.34150391 448.930625 250.37050781 449.61125 250.40039062 450.3125 C250.44182862 453.60203948 250.12694294 455.77343518 248.51171875 458.65625 C245.13923909 461.80319836 241.50840572 463.99428216 237.5 466.25 C236.66267334 466.72598633 235.82534668 467.20197266 234.96264648 467.69238281 C219.66933249 476.22805355 203.63521885 482.60937307 187 488 C186.28279785 488.23702637 185.5655957 488.47405273 184.82666016 488.71826172 C167.39729292 494.42753072 148.80949241 498.09241003 130.43359375 498.203125 C129.64562408 498.21018463 128.85765442 498.21724426 128.04580688 498.22451782 C86.90066583 498.50899527 43.46065018 492.85923245 7.83203125 470.42578125 C7.15591797 470.00095459 6.47980469 469.57612793 5.78320312 469.13842773 C4.50609343 468.31966625 3.2418467 467.480339 1.99414062 466.61743164 C-1.0114871 464.65637018 -2.48974905 463.91075459 -6.08203125 464.5390625 C-9.049583 466.02482469 -11.74332104 467.6521163 -14.5 469.5 C-31.23511256 480.1487174 -50.0475943 486.55512832 -69 492 C-69.76586426 492.22413574 -70.53172852 492.44827148 -71.32080078 492.67919922 C-129.36309513 509.29565413 -195.29641646 495.58422678 -247.2421875 467.18359375 C-248.77021468 466.31794785 -250.29401957 465.44478513 -251.8125 464.5625 C-252.48144287 464.17400879 -253.15038574 463.78551758 -253.83959961 463.38525391 C-257.76808561 461.00525598 -261.19418938 458.65766963 -264 455 C-264.36428582 452.21353304 -264.39959118 450.2371549 -264.125 447.5 C-264.06328613 446.73300781 -264.00157227 445.96601562 -263.93798828 445.17578125 C-261.43089722 418.28058395 -255.50131456 390.94380045 -245 366 C-244.71576172 365.31099609 -244.43152344 364.62199219 -244.13867188 363.91210938 C-227.02669723 322.70292637 -198.53235124 284.21626904 -163 257 C-162.22269531 256.35546875 -161.44539063 255.7109375 -160.64453125 255.046875 C-154.41034925 249.8805382 -147.79537476 245.42801145 -141.02734375 241.00390625 C-138.23131298 239.29775761 -138.23131298 239.29775761 -137 238 C-136.87729533 236.13682642 -136.82008587 234.26929575 -136.7890625 232.40234375 C-136.76295898 231.22051514 -136.73685547 230.03868652 -136.70996094 228.82104492 C-136.68192383 227.5394751 -136.65388672 226.25790527 -136.625 224.9375 C-134.89333171 165.64241285 -116.39373677 109.55756942 -78.3125 63.58886719 C-77.0360816 62.04367914 -75.78326886 60.47908608 -74.53125 58.9140625 C-67.63730966 50.45555836 -59.9558438 42.77211064 -52.25 35.0625 C-51.70647888 34.51798187 -51.16295776 33.97346375 -50.60296631 33.41244507 C-44.58211208 27.39283918 -38.50228161 21.5038073 -32 16 C-30.88469869 15.0294703 -29.7700892 14.05814486 -28.65625 13.0859375 C-25.47796077 10.34078257 -22.25602758 7.65238201 -19 5 C-18.26523437 4.40058594 -17.53046875 3.80117187 -16.7734375 3.18359375 C-11.54934916 -0.58935894 -6.29128052 -1.45583351 0 0 Z" fill="#000000" transform="translate(518,221)"/>
+        </svg>
+      </div>
+      <span class="logo-text">Eburon AI</span>
+    </div>
+
+    <nav>
+      <div class="nav-item active" data-page="generate">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+        </svg>
+        <span>Generate</span>
+      </div>
+      <div class="nav-item" data-page="voices">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+        </svg>
+        <span>Voices</span>
+      </div>
+      <div class="nav-item" data-page="transcribe">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+        </svg>
+        <span>Transcribe</span>
+      </div>
+      <div class="nav-item" data-page="clone">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+        </svg>
+        <span>Clone Voice</span>
+      </div>
+      <div class="nav-item" data-page="history">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span>History</span>
+      </div>
+      <div class="nav-item" data-page="settings">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <span>Settings</span>
+      </div>
+    </nav>
+
+    <div style="margin-top: auto;">
+      <div class="nav-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span>Model: Eburon AI TTS Echo</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Generate Page -->
+    <div id="page-generate" class="page">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Left: Text Input -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Generate Speech</h2>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Text</label>
+            <textarea id="text-input" class="textarea" placeholder="Enter text to synthesize...">Welcome to Eburon AI TTS Echo. This is a test of the text to speech system. The voice sounds natural and expressive. You can customize the emotion and style. Try different voices and languages. Generate your own audio content today.</textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Voice</label>
+              <div style="display: flex; gap: 8px;">
+                <select id="voice-select" class="select" style="flex: 1;">
+                  <option value="echo">Echo (Default)</option>
+                  <option value="nova">Nova</option>
+                  <option value="shell">Shell</option>
+                  <option value="wave">Wave</option>
+                  <option value="amber">Amber</option>
+                  <option value="floyd">Floyd</option>
+                </select>
+                <button id="clone-btn" class="btn btn-secondary" style="padding: 12px;">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Language</label>
+              <select id="language-select" class="select">
+                <option value="en">English</option>
+                <option value="zh">Chinese</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="ru">Russian</option>
+                <option value="tl">Tagalog</option>
+                <option value="itw">Itawit (Training)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Emotion</label>
+            <div class="emotion-chips">
+              <button class="emotion-chip active" data-emotion="" data-sample="This is a demonstration of the Eburon AI text to speech system. The voice reproduces human-like speech with natural intonation and rhythm. Adjust parameters to customize the output for your specific needs. Experience the future of voice synthesis today.">Neutral</button>
+              <button class="emotion-chip" data-emotion="happy" data-sample="Oh my goodness, I cannot believe this is actually happening! This is absolutely the best day of my entire life! I am so incredibly excited and thrilled beyond words! Everything has fallen into place perfectly, and I feel like I could burst with joy! We need to celebrate this amazing moment right now! This is going to be legendary!">Happy</button>
+              <button class="emotion-chip" data-emotion="sad" data-sample="Why did everything have to fall apart like this? I trusted you with everything I had, and you just threw it all away without a second thought. The pain in my chest won't go away, no matter how hard I try to hold it together. I thought we had something real, something that would last forever. Now I'm just alone with these broken memories and this crushing emptiness that won't let me breathe. How could you do this to me?">Sad</button>
+              <button class="emotion-chip" data-emotion="angry" data-sample="I have had ENOUGH of your lies and your broken promises! You think you can treat people like this and get away with it? You looked me straight in the eyes and lied to my face, and you didn't even flinch! I gave you my trust, my time, my loyalty, and you used it all up like it was nothing! You are a DISGUSTING excuse for a human being! Every single word that comes out of your mouth is poison! Do you understand what you've done to me? You DESTROYED everything we had, and for what? A moment of convenience? I will NEVER forgive you for this! You arepathetic and you should be ashamed of yourself!">Angry</button>
+              <button class="emotion-chip" data-emotion="excited" data-sample="HOLY MOLY, THIS IS INSANE! I cannot even begin to describe how amped up I am right now! This is literally the most EPIC thing that has ever happened in the history of everything! My mind is completely BLOWN! We are witnessing history in the making, people! This changes EVERYTHING! Drop everything right now and pay attention because THIS is the moment we've all been waiting for! This is bigger than all of us combined! Let's GO!">Excited</button>
+              <button class="emotion-chip" data-emotion="calm" data-sample="Close your eyes and breathe in slowly. Feel the tension melting away from every muscle in your body. The world is quiet now, and you are at peace. There is nothing to fear, nothing to worry about. You are safe, you are calm, you are free. Let go of everything that troubles you. Rest now. Everything is going to be perfectly fine.">Calm</button>
+              <button class="emotion-chip" data-emotion="fear" data-sample="Oh no, oh no, oh no... this is really bad. I can feel my heart racing so fast I think it's going to explode. Something is terribly wrong here, I can feel it in my bones. Why is everything so quiet all of a sudden? Every shadow looks like something dangerous is hiding there. I need to get out of here RIGHT NOW! Please, please, please tell me someone is there. I am so scared I can barely breathe.">Fear</button>
+              <button class="emotion-chip" data-emotion="disgust" data-sample="Ugh, seriously? That is absolutely revolting and completely unacceptable! I cannot believe you would even SUGGEST something so disgusting and offensive. The sheer thought of it makes me want to vomit. Do you have any shame at all? This is the most vile, repulsive thing I have ever heard in my entire life. You should be absolutely ashamed of yourself for even thinking about something like that. Disgusting!">Disgust</button>
+              <button class="emotion-chip" data-emotion="surprised" data-sample="Wait, WAIT, what?! NO WAY! That is absolutely INSANE! I literally have no words right now! This is completely out of left field! My mind is absolutely BLOWN! I never saw this coming in a million years! This changes absolutely EVERYTHING! How is this even possible?! This is the most unexpected thing that has ever happened to me!">Surprised</button>
+            </div>
+          </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Style</label>
+            <input type="text" id="style-input" class="input" placeholder="warm, enthusiastic, narrator, casual...">
+          </div>
+
+          <div style="display: flex; gap: 12px;">
+            <button id="generate-btn" class="btn btn-primary" style="flex: 1;">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Generate
+            </button>
+            <button id="clear-btn" class="btn btn-secondary">Clear</button>
+          </div>
+
+          <div id="status" class="status hidden"></div>
+
+          <div id="audio-section" class="hidden">
+            <audio id="audio-player" class="audio-player" controls></audio>
+            <div style="margin-top: 12px; display: flex; gap: 12px;">
+              <a id="download-link" href="#" class="btn btn-secondary" style="flex: 1; justify-content: center;">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Download
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Voice Profiles -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Voice Profiles</h2>
+            <button id="new-voice-btn" class="btn btn-secondary">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              New Voice
+            </button>
+          </div>
+          <div id="voices-list" class="voice-grid">
+            <!-- Voices will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voices Page -->
+    <div id="page-voices" class="page hidden">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Voice Library</h2>
+        </div>
+        <div id="all-voices-list" class="voice-grid">
+          <!-- All voices will be loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Transcribe Page -->
+    <div id="page-transcribe" class="page hidden">
+      <div class="card" style="max-width: 800px; margin: 0 auto;">
+        <div class="card-header">
+          <h2 class="card-title">🎤 Eburon AI STT - Aquilles Model</h2>
+          <span style="color: var(--text-muted); font-size: 0.875rem;">Speech to Text Transcription</span>
+        </div>
+        
+        <div style="margin-bottom: 24px;">
+          <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Upload Audio</label>
+          <div class="upload-area" id="transcribe-upload-area">
+            <input type="file" id="transcribe-audio-input" accept="audio/*" hidden>
+            <svg width="48" height="48" fill="none" stroke="var(--accent)" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+            </svg>
+            <p style="margin-top: 12px;">Click to upload audio for transcription</p>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">WAV, MP3, M4A supported</p>
+          </div>
+          
+          <div id="transcribe-audio-preview" class="hidden" style="margin-top: 16px;">
+            <audio id="transcribe-player" controls style="width: 100%;"></audio>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Language (optional)</label>
+          <select id="transcribe-language" class="select">
+            <option value="">Auto Detect</option>
+            <option value="en">English</option>
+            <option value="zh">Chinese</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="ja">Japanese</option>
+            <option value="ko">Korean</option>
+            <option value="it">Italian</option>
+            <option value="pt">Portuguese</option>
+            <option value="ru">Russian</option>
+            <option value="tl">Tagalog</option>
+          </select>
+        </div>
+
+        <button id="transcribe-btn" class="btn btn-primary" style="width: 100%;" disabled>
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+          </svg>
+          Transcribe Audio
+        </button>
+
+        <div id="transcribe-status" class="status hidden" style="margin-top: 16px;"></div>
+
+        <div id="transcribe-result" class="hidden" style="margin-top: 24px;">
+          <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Transcription</label>
+          <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; min-height: 120px;">
+            <p id="transcribe-text" style="white-space: pre-wrap; line-height: 1.6;"></p>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+            <span id="transcribe-meta" style="color: var(--text-muted); font-size: 0.875rem;"></span>
+            <button id="copy-transcribe-btn" class="btn btn-secondary">Copy Text</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clone Voice Page -->
+    <div id="page-clone" class="page hidden">
+      <div class="card" style="max-width: 800px; margin: 0 auto;">
+        <div class="card-header">
+          <h2 class="card-title">🎙️ Voice Clone</h2>
+          <span style="color: var(--text-muted); font-size: 0.875rem;">Create your own AI voice clone</span>
+        </div>
+        
+        <div style="margin-bottom: 24px;">
+          <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Voice Name</label>
+          <input type="text" id="clone-name-page" class="input" placeholder="My Custom Voice">
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Upload Audio Reference</label>
+          <div class="upload-area" id="clone-upload-area-page">
+            <input type="file" id="clone-audio-input-page" accept="audio/*" hidden>
+            <svg width="48" height="48" fill="none" stroke="var(--accent)" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+            </svg>
+            <p style="margin-top: 12px;">Click to upload audio for voice cloning</p>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">WAV, MP3, M4A supported (10s-60s ideal)</p>
+          </div>
+          
+          <div id="clone-audio-preview-page" class="hidden" style="margin-top: 16px;">
+            <audio id="clone-player-page" controls style="width: 100%;"></audio>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Reference Text (what was spoken)</label>
+          <textarea id="clone-reference-text" class="textarea" placeholder="Enter the text that was spoken in the audio..." style="min-height: 80px;"></textarea>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Target Language</label>
+          <select id="clone-language-page" class="select">
+            <option value="en">English</option>
+            <option value="zh">Chinese</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="ja">Japanese</option>
+            <option value="ko">Korean</option>
+            <option value="it">Italian</option>
+            <option value="pt">Portuguese</option>
+            <option value="ru">Russian</option>
+            <option value="tl">Tagalog</option>
+            <option value="itw">Itawit (Training)</option>
+          </select>
+        </div>
+
+        <button id="clone-voice-btn-page" class="btn btn-primary" style="width: 100%;" disabled>
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+          Clone Voice
+        </button>
+
+        <div id="clone-status-page" class="status hidden" style="margin-top: 16px;"></div>
+
+        <div id="clone-result-page" class="hidden" style="margin-top: 24px;">
+          <div style="background: var(--bg-tertiary); border: 1px solid var(--accent); border-radius: 8px; padding: 16px;">
+            <p style="color: var(--accent); font-weight: 600;">✓ Voice Clone Created!</p>
+            <p id="clone-result-name" style="margin-top: 8px; color: var(--text-secondary);"></p>
+          </div>
+          <button id="use-clone-btn" class="btn btn-primary" style="width: 100%; margin-top: 16px;">
+            Use This Voice for TTS
+          </button>
+        </div>
+      </div>
+
+      <!-- Saved Clones -->
+      <div class="card" style="max-width: 800px; margin: 24px auto 0;">
+        <div class="card-header">
+          <h3 class="card-title">Saved Voice Clones</h3>
+        </div>
+        <div id="cloned-voices-list" class="voice-grid">
+          <!-- Saved clones will be loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- History Page -->
+    <div id="page-history" class="page hidden">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Generation History</h2>
+          <button id="clear-history-btn" class="btn btn-secondary">Clear All</button>
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Text</th>
+                <th>Voice</th>
+                <th>Emotion</th>
+                <th>Duration</th>
+                <th>Play</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="history-list">
+              <!-- History items will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Page -->
+    <div id="page-settings" class="page hidden">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Settings</h2>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Server URL</label>
+          <input type="text" id="server-url" class="input" value="http://localhost:8000">
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Output Format</label>
+          <select id="output-format" class="select">
+            <option value="wav">WAV</option>
+            <option value="mp3">MP3</option>
+          </select>
+        </div>
+        <button id="save-settings" class="btn btn-primary">Save Settings</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Clone Voice Modal -->
+  <div id="clone-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;">🎤 Clone Your Voice</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 24px;">Upload an audio sample (10-30 seconds) to create a voice clone.</p>
+
+      <div class="upload-area" id="upload-area">
+        <input type="file" id="audio-input" accept="audio/*" hidden>
+        <svg width="48" height="48" fill="none" stroke="var(--accent)" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a4 4 0 014 4v1m0 0v8a4 4 0 01-4 4H6m0 0h8a4 4 0 014-4V6m0 0H6a4 4 0 01-4-4V6a4 4 0 014-4h8a4 4 0 014 4v8z"/>
+        </svg>
+        <p style="margin-top: 12px;">Click to upload audio</p>
+        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">WAV, MP3, M4A supported</p>
+      </div>
+
+      <div id="audio-preview" class="hidden" style="margin-top: 16px;">
+        <audio id="preview-player" controls style="width: 100%;"></audio>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Reference Text</label>
+        <textarea id="reference-text" class="textarea" rows="3" placeholder="Enter the text spoken in your audio sample..."></textarea>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Voice Name</label>
+        <input type="text" id="clone-name" class="input" placeholder="My Cloned Voice">
+      </div>
+
+      <div style="margin-top: 16px;">
+        <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Target Language</label>
+        <select id="clone-language" class="select">
+          <option value="en">English</option>
+          <option value="zh">Chinese</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+          <option value="ja">Japanese</option>
+          <option value="ko">Korean</option>
+          <option value="it">Italian</option>
+          <option value="pt">Portuguese</option>
+          <option value="ru">Russian</option>
+          <option value="tl">Tagalog</option>
+          <option value="itw" disabled>Itawit (Training Required)</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button id="cancel-clone" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+        <button id="submit-clone" class="btn btn-primary" style="flex: 1;" disabled>Clone Voice</button>
+      </div>
+
+      <div id="clone-status" class="status hidden"></div>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let serverUrl = 'http://localhost:8000';
+    let clonedVoices = [];
+    let selectedVoiceId = null;
+    let history = [];
+    let selectedEmotion = '';
+    let selectedCloneId = null;
+    let cloneAudioFile = null;
+
+    // DOM Elements
+    const textInput = document.getElementById('text-input');
+    const voiceSelect = document.getElementById('voice-select');
+    const languageSelect = document.getElementById('language-select');
+    const styleInput = document.getElementById('style-input');
+    const generateBtn = document.getElementById('generate-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const status = document.getElementById('status');
+    const audioSection = document.getElementById('audio-section');
+    const audioPlayer = document.getElementById('audio-player');
+    const downloadLink = document.getElementById('download-link');
+    const cloneBtn = document.getElementById('clone-btn');
+    const cloneModal = document.getElementById('clone-modal');
+    const uploadArea = document.getElementById('upload-area');
+    const audioInput = document.getElementById('audio-input');
+    const audioPreview = document.getElementById('audio-preview');
+    const previewPlayer = document.getElementById('preview-player');
+    const referenceText = document.getElementById('reference-text');
+    const cloneName = document.getElementById('clone-name');
+    const submitClone = document.getElementById('submit-clone');
+    const cancelClone = document.getElementById('cancel-clone');
+    const cloneStatus = document.getElementById('clone-status');
+    const voicesList = document.getElementById('voices-list');
+    const historyList = document.getElementById('history-list');
+
+    // Navigation
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const page = item.dataset.page;
+        if (!page) return;
+
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+
+        document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+        document.getElementById(`page-${page}`).classList.remove('hidden');
+
+        if (page === 'history') loadHistory();
+        if (page === 'voices') loadAllVoices();
+        if (page === 'transcribe') initTranscribePage();
+        if (page === 'clone') loadClonedVoicesForPage();
+      });
+    });
+
+    // Transcribe page elements
+    const transcribeUploadArea = document.getElementById('transcribe-upload-area');
+    const transcribeAudioInput = document.getElementById('transcribe-audio-input');
+    const transcribeAudioPreview = document.getElementById('transcribe-audio-preview');
+    const transcribePlayer = document.getElementById('transcribe-player');
+    const transcribeLanguage = document.getElementById('transcribe-language');
+    const transcribeBtn = document.getElementById('transcribe-btn');
+    const transcribeStatus = document.getElementById('transcribe-status');
+    const transcribeResult = document.getElementById('transcribe-result');
+    const transcribeText = document.getElementById('transcribe-text');
+    const transcribeMeta = document.getElementById('transcribe-meta');
+    const copyTranscribeBtn = document.getElementById('copy-transcribe-btn');
+    let transcribeAudioFile = null;
+
+    function initTranscribePage() {
+      // Load STT model status
+      fetch(`${serverUrl}/stt/status`)
+        .then(r => r.json())
+        .then(data => {
+          console.log('STT Status:', data);
+        })
+        .catch(e => console.error('STT status error:', e));
+    }
+
+    // Transcribe upload
+    transcribeUploadArea.addEventListener('click', () => transcribeAudioInput.click());
+    
+    transcribeAudioInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        transcribeAudioFile = e.target.files[0];
+        transcribePlayer.src = URL.createObjectURL(transcribeAudioFile);
+        transcribeAudioPreview.classList.remove('hidden');
+        transcribeBtn.disabled = false;
+      }
+    });
+
+    // Transcribe button
+    transcribeBtn.addEventListener('click', async () => {
+      if (!transcribeAudioFile) return;
+
+      transcribeBtn.disabled = true;
+      transcribeBtn.textContent = 'Transcribing...';
+      transcribeStatus.classList.remove('hidden');
+      transcribeStatus.innerHTML = '<span>⏳ Transcribing audio...</span>';
+      transcribeStatus.className = 'status';
+      transcribeResult.classList.add('hidden');
+
+      let transcribedText = '';
+      let usedFallback = false;
+      let duration = 0;
+      let lang = 'en';
+
+      try {
+        // Try server-side transcription first
+        const formData = new FormData();
+        formData.append('audio', transcribeAudioFile);
+        if (transcribeLanguage.value) {
+          formData.append('language', transcribeLanguage.value);
+        }
+
+        const res = await fetch(`${serverUrl}/transcribe`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) throw new Error('Transcription failed');
+
+        const data = await res.json();
+        
+        // Check if server returned valid text
+        if (data.text && data.text.length > 5 && !data.text.includes('No speech detected')) {
+          transcribedText = data.text;
+          duration = data.duration || 0;
+          lang = data.language || 'en';
+        } else {
+          throw new Error('No speech detected');
+        }
+      } catch (error) {
+        // Fallback to Web Speech API
+        console.log('Server transcription failed, trying Web Speech API...');
+        usedFallback = true;
+        
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+          transcribedText = 'Web Speech API not supported in this browser. Please use Chrome or Edge.';
+        } else {
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          const recognition = new SpeechRecognition();
+          
+          const langMap = {
+            'en': 'en-US', 'zh': 'zh-CN', 'es': 'es-ES', 'fr': 'fr-FR',
+            'de': 'de-DE', 'ja': 'ja-JP', 'ko': 'ko-KR', 'it': 'it-IT',
+            'pt': 'pt-PT', 'ru': 'ru-RU', 'tl': 'fil-PH'
+          };
+          recognition.lang = transcribeLanguage.value ? (langMap[transcribeLanguage.value] || 'en-US') : 'en-US';
+          recognition.continuous = true;
+          recognition.interimResults = true;
+          
+          let finalTranscript = '';
+          
+          await new Promise((resolve) => {
+            recognition.onresult = (event) => {
+              for (let i = event.resultIndex; i < event.results.length; i++) {
+                if (event.results[i].isFinal) {
+                  finalTranscript += event.results[i][0].transcript + ' ';
+                }
+              }
+            };
+            
+            recognition.onerror = (e) => {
+              console.error('Speech error:', e.error);
+              finalTranscript = 'Speech recognition error: ' + e.error;
+            };
+            
+            recognition.onend = () => {
+              transcribedText = finalTranscript.trim() || 'No speech detected';
+              resolve();
+            };
+            
+            transcribePlayer.currentTime = 0;
+            transcribePlayer.play();
+            recognition.start();
+            
+            transcribePlayer.onended = () => {
+              recognition.stop();
+            };
+            
+            setTimeout(() => {
+              if (recognition.state === 'listening') recognition.stop();
+            }, 60000);
+          });
+        }
+      }
+
+      transcribeText.textContent = transcribedText;
+      transcribeMeta.textContent = usedFallback 
+        ? `Using Web Speech API` 
+        : `Duration: ${duration?.toFixed(2) || 'N/A'}s | Language: ${lang}`;
+      transcribeResult.classList.remove('hidden');
+      transcribeStatus.innerHTML = '<span>✓ Transcription complete!' + (usedFallback ? ' (Web Speech API)' : '') + '</span>';
+      transcribeStatus.className = 'status success';
+
+      transcribeBtn.disabled = false;
+      transcribeBtn.innerHTML = `
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+        </svg>
+        Transcribe Audio
+      `;
+    });
+
+    // Copy transcription
+    copyTranscribeBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(transcribeText.textContent);
+      copyTranscribeBtn.textContent = 'Copied!';
+      setTimeout(() => copyTranscribeBtn.textContent = 'Copy Text', 2000);
+    });
+
+    // Clone Voice Page elements
+    const cloneUploadAreaPage = document.getElementById('clone-upload-area-page');
+    const cloneAudioInputPage = document.getElementById('clone-audio-input-page');
+    const cloneAudioPreviewPage = document.getElementById('clone-audio-preview-page');
+    const clonePlayerPage = document.getElementById('clone-player-page');
+    const cloneNamePage = document.getElementById('clone-name-page');
+    const cloneReferenceText = document.getElementById('clone-reference-text');
+    const cloneLanguagePage = document.getElementById('clone-language-page');
+    const cloneVoiceBtnPage = document.getElementById('clone-voice-btn-page');
+    const cloneStatusPage = document.getElementById('clone-status-page');
+    const cloneResultPage = document.getElementById('clone-result-page');
+    const cloneResultName = document.getElementById('clone-result-name');
+    const useCloneBtn = document.getElementById('use-clone-btn');
+    const clonedVoicesList = document.getElementById('cloned-voices-list');
+    let cloneAudioFilePage = null;
+    let createdCloneData = null;
+
+    // Clone upload
+    cloneUploadAreaPage.addEventListener('click', () => cloneAudioInputPage.click());
+    
+    cloneAudioInputPage.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        cloneAudioFilePage = e.target.files[0];
+        clonePlayerPage.src = URL.createObjectURL(cloneAudioFilePage);
+        cloneAudioPreviewPage.classList.remove('hidden');
+        checkCloneFormPage();
+      }
+    });
+
+    cloneNamePage.addEventListener('input', checkCloneFormPage);
+    cloneReferenceText.addEventListener('input', checkCloneFormPage);
+
+    function checkCloneFormPage() {
+      cloneVoiceBtnPage.disabled = !(cloneAudioFilePage && cloneNamePage.value.trim());
+    }
+
+    // Load cloned voices for page
+    window.loadClonedVoicesForPage = async function() {
+      try {
+        const res = await fetch(`${serverUrl}/voice/prompts`);
+        const data = await res.json();
+        
+        if (data.voice_prompts && data.voice_prompts.length > 0) {
+          clonedVoicesList.innerHTML = data.voice_prompts.map(vp => `
+            <div class="voice-card">
+              <div class="voice-card-avatar">
+                <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                  <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                </svg>
+              </div>
+              <div class="voice-card-name">${vp.name}</div>
+              <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px;">${vp.reference_text || 'Voice Clone'}</div>
+              <div style="display: flex; gap: 8px; margin-top: 12px;">
+                <button class="btn btn-secondary" style="flex: 1; padding: 6px 12px; font-size: 0.75rem;" onclick="useVoiceClone('${vp.voice_prompt_id}', '${vp.name}')">Use</button>
+                <button class="btn btn-secondary" style="flex: 1; padding: 6px 12px; font-size: 0.75rem; color: var(--error);" onclick="deleteVoiceClone('${vp.voice_prompt_id}')">Delete</button>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          clonedVoicesList.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 24px;">No voice clones yet. Create one above!</p>';
+        }
+      } catch (e) {
+        console.error('Error loading clones:', e);
+        clonedVoicesList.innerHTML = '<p style="color: var(--error); text-align: center;">Failed to load voice clones</p>';
+      }
+    };
+
+    // Clone voice button
+    cloneVoiceBtnPage.addEventListener('click', async () => {
+      if (!cloneAudioFilePage || !cloneNamePage.value.trim()) return;
+
+      cloneVoiceBtnPage.disabled = true;
+      cloneVoiceBtnPage.textContent = 'Cloning...';
+      cloneStatusPage.classList.remove('hidden');
+      cloneStatusPage.innerHTML = '<span>⏳ Creating voice clone...</span>';
+      cloneStatusPage.className = 'status';
+      cloneResultPage.classList.add('hidden');
+
+      const formData = new FormData();
+      formData.append('audio', cloneAudioFilePage);
+      formData.append('name', cloneNamePage.value.trim());
+      if (cloneReferenceText.value.trim()) {
+        formData.append('reference_text', cloneReferenceText.value.trim());
+      }
+      formData.append('language', cloneLanguagePage.value);
+
+      try {
+        const res = await fetch(`${serverUrl}/voice/clone`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) throw new Error('Voice cloning failed');
+
+        const data = await res.json();
+        
+        createdCloneData = data;
+        cloneResultName.textContent = `Name: ${data.name} | Duration: ${data.duration?.toFixed(2) || 'N/A'}s`;
+        cloneResultPage.classList.remove('hidden');
+        cloneStatusPage.innerHTML = '<span>✓ Voice clone created successfully!</span>';
+        cloneStatusPage.className = 'status success';
+        
+        // Refresh the list
+        loadClonedVoicesForPage();
+        
+      } catch (error) {
+        cloneStatusPage.innerHTML = '<span>✕ Error: ' + error.message + '</span>';
+        cloneStatusPage.className = 'status error';
+      } finally {
+        cloneVoiceBtnPage.disabled = false;
+        cloneVoiceBtnPage.innerHTML = `
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+          Clone Voice
+        `;
+      }
+    });
+
+    // Use clone button
+    useCloneBtn.addEventListener('click', () => {
+      if (createdCloneData) {
+        // Switch to generate page and select the cloned voice
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.querySelector('[data-page="generate"]').classList.add('active');
+        document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+        document.getElementById('page-generate').classList.remove('hidden');
+        
+        // Add to cloned voices and select it
+        clonedVoices.push({ id: createdCloneData.voice_prompt_id, name: createdCloneData.name });
+        renderVoices();
+        voiceSelect.value = createdCloneData.voice_prompt_id;
+      }
+    });
+
+    // Use voice clone from list
+    window.useVoiceClone = function(voicePromptId, name) {
+      clonedVoices.push({ id: voicePromptId, name: name });
+      renderVoices();
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      document.querySelector('[data-page="generate"]').classList.add('active');
+      document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+      document.getElementById('page-generate').classList.remove('hidden');
+      voiceSelect.value = voicePromptId;
+    };
+
+    // Delete voice clone
+    window.deleteVoiceClone = async function(voicePromptId) {
+      if (!confirm('Delete this voice clone?')) return;
+      
+      try {
+        await fetch(`${serverUrl}/voice/prompts/${voicePromptId}`, { method: 'DELETE' });
+        clonedVoices = clonedVoices.filter(v => v.id !== voicePromptId);
+        renderVoices();
+        loadClonedVoicesForPage();
+      } catch (e) {
+        alert('Failed to delete voice clone');
+      }
+    };
+
+    // Emotion chips
+    document.querySelectorAll('.emotion-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.emotion-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        selectedEmotion = chip.dataset.emotion;
+        
+        // Populate sample text when emotion is selected
+        const sampleText = chip.dataset.sample;
+        if (sampleText && !textInput.value.trim()) {
+          textInput.value = sampleText;
+        } else if (sampleText) {
+          // Optionally ask user if they want to replace
+          if (confirm('Replace current text with emotion sample?')) {
+            textInput.value = sampleText;
+          }
+        }
+      });
+    });
+
+    // Voice select - check for cloned voice
+    voiceSelect.addEventListener('change', () => {
+      const presetVoices = ['echo', 'nova', 'shell', 'wave', 'amber', 'floyd'];
+      selectedCloneId = presetVoices.includes(voiceSelect.value) ? null : voiceSelect.value;
+    });
+
+    // Clone button
+    cloneBtn.addEventListener('click', () => {
+      cloneModal.classList.remove('hidden');
+    });
+
+    cancelClone.addEventListener('click', () => {
+      cloneModal.classList.add('hidden');
+      resetCloneForm();
+    });
+
+    cloneModal.addEventListener('click', (e) => {
+      if (e.target === cloneModal) {
+        cloneModal.classList.add('hidden');
+        resetCloneForm();
+      }
+    });
+
+    // Upload audio
+    uploadArea.addEventListener('click', () => audioInput.click());
+
+    audioInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        cloneAudioFile = file;
+        previewPlayer.src = URL.createObjectURL(file);
+        audioPreview.classList.remove('hidden');
+        updateCloneBtn();
+      }
+    });
+
+    referenceText.addEventListener('input', updateCloneBtn);
+    cloneName.addEventListener('input', updateCloneBtn);
+
+    function updateCloneBtn() {
+      submitClone.disabled = !cloneAudioFile || !referenceText.value.trim();
+    }
+
+    function resetCloneForm() {
+      cloneAudioFile = null;
+      referenceText.value = '';
+      cloneName.value = '';
+      audioPreview.classList.add('hidden');
+      previewPlayer.src = '';
+      submitClone.disabled = true;
+      cloneStatus.classList.add('hidden');
+    }
+
+    // Submit clone
+    submitClone.addEventListener('click', async () => {
+      if (!cloneAudioFile || !referenceText.value.trim()) return;
+
+      submitClone.disabled = true;
+      submitClone.textContent = 'Cloning...';
+
+      const formData = new FormData();
+      formData.append('audio', cloneAudioFile);
+      formData.append('reference_text', referenceText.value.trim());
+      formData.append('name', cloneName.value.trim() || 'My Cloned Voice');
+
+      try {
+        const res = await fetch(`${serverUrl}/voice/clone`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) throw new Error('Failed to clone voice');
+
+        const data = await res.json();
+        
+        cloneStatus.innerHTML = '<span>✓</span> Voice cloned successfully!';
+        cloneStatus.className = 'status success';
+        
+        await loadClonedVoices();
+        
+        setTimeout(() => {
+          cloneModal.classList.add('hidden');
+          resetCloneForm();
+        }, 1500);
+      } catch (error) {
+        cloneStatus.innerHTML = '<span>✕</span> Error: ' + error.message;
+        cloneStatus.className = 'status error';
+        submitClone.disabled = false;
+        submitClone.textContent = 'Clone Voice';
+      }
+    });
+
+    // Load cloned voices
+    async function loadClonedVoices() {
+      try {
+        const res = await fetch(`${serverUrl}/voice/prompts`);
+        const data = await res.json();
+        clonedVoices = data.voice_prompts || [];
+        renderVoices();
+      } catch (e) {
+        console.error('Failed to load voices:', e);
+      }
+    }
+
+    // Render voices
+    function renderVoices() {
+      const presetVoices = [
+        { id: 'echo', name: 'Echo (Default)', type: 'preset' },
+        { id: 'nova', name: 'Nova', type: 'preset' },
+        { id: 'shell', name: 'Shell', type: 'preset' },
+        { id: 'wave', name: 'Wave', type: 'preset' },
+        { id: 'amber', name: 'Amber', type: 'preset' },
+        { id: 'floyd', name: 'Floyd', type: 'preset' },
+      ];
+      
+      const allVoices = [
+        ...presetVoices,
+        ...clonedVoices.map(v => ({ ...v, type: 'cloned' }))
+      ];
+
+      // Update voice select dropdown
+      voiceSelect.innerHTML = presetVoices.map(v => 
+        `<option value="${v.id}">${v.name}</option>`
+      ).join('') + 
+      (clonedVoices.length > 0 ? '<optgroup label="Cloned Voices">' : '') +
+      clonedVoices.map(v => 
+        `<option value="${v.id}">${v.name}</option>`
+      ).join('') +
+      (clonedVoices.length > 0 ? '</optgroup>' : '');
+
+      voicesList.innerHTML = allVoices.map(voice => `
+        <div class="voice-card ${selectedVoiceId === voice.id ? 'selected' : ''}" data-id="${voice.id}" data-type="${voice.type}">
+          <div class="voice-card-avatar">
+            <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+            </svg>
+          </div>
+          <div class="voice-card-name">${voice.name}</div>
+          <div class="voice-card-info">${voice.type === 'cloned' ? '🎤 Cloned' : 'Default'}</div>
+        </div>
+      `).join('');
+
+      // Add click handlers
+      document.querySelectorAll('.voice-card').forEach(card => {
+        card.addEventListener('click', () => {
+          selectedVoiceId = card.dataset.id;
+          voiceSelect.value = selectedVoiceId;
+          if (card.dataset.type === 'cloned') {
+            selectedCloneId = selectedVoiceId;
+          } else {
+            selectedCloneId = null;
+          }
+          renderVoices();
+        });
+      });
+    }
+
+    // Generate speech
+    generateBtn.addEventListener('click', async () => {
+      const text = textInput.value.trim();
+      if (!text) {
+        showStatus('Please enter some text', 'error');
+        return;
+      }
+
+      const voice = voiceSelect.value;
+      const language = languageSelect.value;
+      const style = styleInput.value.trim();
+      const emotion = selectedEmotion;
+      const voicePromptId = selectedCloneId;
+
+      generateBtn.disabled = true;
+      showStatus(voicePromptId ? 'Generating with cloned voice...' : 'Generating speech...', 'loading');
+      audioSection.classList.add('hidden');
+
+      try {
+        const res = await fetch(`${serverUrl}/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, voice, voice_prompt_id: voicePromptId, language, emotion, style })
+        });
+
+        if (!res.ok) throw new Error('Generation failed');
+
+        const data = await res.json();
+
+        audioPlayer.src = `${serverUrl}/audio?path=${encodeURIComponent(data.path)}`;
+        downloadLink.href = `${serverUrl}/audio?path=${encodeURIComponent(data.path)}`;
+        audioSection.classList.remove('hidden');
+
+        showStatus('Speech generated successfully!', 'success');
+
+        // Save to history with audio path for playback
+        saveToHistory(text, voice, emotion, data.duration, data.path);
+
+        audioPlayer.play();
+      } catch (error) {
+        showStatus('Error: ' + error.message, 'error');
+      } finally {
+        generateBtn.disabled = false;
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      textInput.value = '';
+      audioSection.classList.add('hidden');
+      status.classList.add('hidden');
+    });
+
+    function showStatus(message, type) {
+      status.innerHTML = message;
+      status.className = `status ${type}`;
+      status.classList.remove('hidden');
+    }
+
+    // History functions
+    function saveToHistory(text, voice, emotion, duration, audioPath) {
+      const durationNum = parseFloat(duration);
+      const item = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        text: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
+        fullText: text,
+        voice,
+        emotion,
+        duration: !isNaN(durationNum) ? durationNum.toFixed(2) + 's' : 'N/A',
+        durationRaw: !isNaN(durationNum) ? durationNum : 0,
+        audioPath: audioPath || ''
+      };
+      history.unshift(item);
+      localStorage.setItem('echobox_history', JSON.stringify(history));
+    }
+
+    function loadHistory() {
+      history = JSON.parse(localStorage.getItem('echobox_history') || '[]');
+      renderHistory();
+    }
+
+    function renderHistory() {
+      if (history.length === 0) {
+        historyList.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No history yet</td></tr>';
+        return;
+      }
+
+      historyList.innerHTML = history.map((item, idx) => `
+        <tr>
+          <td>${new Date(item.date).toLocaleString()}</td>
+          <td title="${item.fullText || item.text}">${item.text}</td>
+          <td>${item.voice}</td>
+          <td>${item.emotion || 'neutral'}</td>
+          <td>${item.duration || 'N/A'}</td>
+          <td>
+            ${item.audioPath && item.duration && item.duration !== 'N/A' && item.duration !== '0.00s' ? `
+              <button class="btn-icon" onclick="playHistoryAudio('${item.audioPath.replace(/'/g, "\\'")}')" title="Play">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+            ` : '<span style="color: var(--text-muted); font-size: 0.75rem;">-</span>'}
+          </td>
+          <td>
+            <button class="btn-icon" onclick="deleteHistory(${item.id})" title="Delete">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.playHistoryAudio = function(audioPath) {
+      if (!audioPath) return;
+      const audioUrl = audioPath.startsWith('http') ? audioPath : `${serverUrl}/audio?path=${encodeURIComponent(audioPath)}`;
+      const audio = new Audio(audioUrl);
+      audio.play().catch(e => console.error('Playback error:', e));
+    };
+
+    window.deleteHistory = function(id) {
+      history = history.filter(h => h.id !== id);
+      localStorage.setItem('echobox_history', JSON.stringify(history));
+      renderHistory();
+    };
+
+    document.getElementById('clear-history-btn').addEventListener('click', () => {
+      if (confirm('Clear all history?')) {
+        history = [];
+        localStorage.setItem('echobox_history', JSON.stringify(history));
+        renderHistory();
+      }
+    });
+
+    function loadAllVoices() {
+      const allVoices = [
+        { id: 'echo', name: 'Echo', type: 'preset' },
+        { id: 'nova', name: 'Nova', type: 'preset' },
+        { id: 'shell', name: 'Shell', type: 'preset' },
+        { id: 'wave', name: 'Wave', type: 'preset' },
+        { id: 'amber', name: 'Amber', type: 'preset' },
+        { id: 'floyd', name: 'Floyd', type: 'preset' },
+        ...clonedVoices.map(v => ({ ...v, type: 'cloned' }))
+      ];
+
+      document.getElementById('all-voices-list').innerHTML = allVoices.map(voice => `
+        <div class="voice-card">
+          <div class="voice-card-avatar">
+            <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+            </svg>
+          </div>
+          <div class="voice-card-name">${voice.name}</div>
+          <div class="voice-card-info">${voice.type === 'cloned' ? '🎤 Cloned Voice' : 'Default Voice'}</div>
+        </div>
+      `).join('');
+    }
+
+    // Initialize
+    loadClonedVoices();
+  </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+{
+  "format": "audio",
+  "language": "itv",
+  "audio_config": {
+    "sample_rate": 24000,
+    "channels": 1,
+    "codec": "pcm_s16le"
+  },
+  "datasets": [
+    {
+      "name": "itawit_jw_org",
+      "files": [
+        {
+          "audio": "fg_ITW_02.wav",
+          "text": "Hanna yo Nakakkasta nga Balita?",
+          "duration": 6.0
+        },
+        {
+          "audio": "fg_ITW_03.wav", 
+          "text": "Innia yo Dios?",
+          "duration": 6.0
+        },
+        {
+          "audio": "fg_ITW_04.wav",
+          "text": "Talaga kazze nga Naggafu kan Dios yo Nakakkasta nga Balita",
+          "duration": 6.0
+        },
+        {
+          "audio": "fg_ITW_05.wav",
+          "text": "Innia y Jesu Cristo?",
+          "duration": 6.0
+        },
+        {
+          "audio": "fg_ITW_06.wav",
+          "text": "Hanna yo Gakkag yo Dios kan yo Utun Lusak?",
+          "duration": 6.0
+        },
+        {
+          "audio": "fg_ITW_07.wav",
+          "text": "Hanna yo Innanama yo Nakkakatay ira?",
+          "duration": 6.0
+        },
+        {
+          "audio": "fg_ITW_08.wav",
+          "text": "Hanna yo Pappatulan yo Dios?",
+          "duration": 6.0
+        },
+        {
+          "audio": "fg_ITW_09.wav",
+          "text": "Ka-am ta Ipamavulun yo Dios yo Kinamarakat en Pazziriyat?",
+          "duration": 6.0
+        },
+        {
+          "audio": "fg_ITW_10.wav",
+          "text": "Kunnasi nga Mabbalin kan Napagayayat yo Familliam?",
+          "duration": 6.0
+        }
+      ]
+    }
+  ]
+}
