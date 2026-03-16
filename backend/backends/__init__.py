@@ -15,7 +15,7 @@ from ..platform_detect import get_backend_type
 class TTSBackend(Protocol):
     """Protocol for TTS backend implementations."""
     
-    async def load_model(self, model_size: str) -> None:
+    async def load_model(self, model_size: str, language: Optional[str] = None) -> None:
         """Load TTS model."""
         ...
     

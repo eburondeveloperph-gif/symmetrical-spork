@@ -6,6 +6,9 @@ from typing import Tuple, Optional
 from pathlib import Path
 
 
+from .languages import validate_language_code
+
+
 def validate_text(text: str, max_length: int = 5000) -> Tuple[bool, Optional[str]]:
     """
     Validate text input.
@@ -30,8 +33,8 @@ def validate_language(language: str) -> Tuple[bool, Optional[str]]:
     """
     Validate language code.
 
-    Supported languages for Qwen3-TTS:
-    Chinese, English, Japanese, Korean, German, French, Russian, Portuguese, Spanish, Italian
+    Supported languages include detailed codes from the frontend and 
+    base codes supported by Qwen3-TTS.
 
     Args:
         language: Language code
@@ -39,11 +42,7 @@ def validate_language(language: str) -> Tuple[bool, Optional[str]]:
     Returns:
         Tuple of (is_valid, error_message)
     """
-    valid_languages = ["zh", "en", "ja", "ko", "de", "fr", "ru", "pt", "es", "it"]
-    if language not in valid_languages:
-        return False, f"Invalid language (must be one of: {', '.join(valid_languages)})"
-
-    return True, None
+    return validate_language_code(language)
 
 
 def validate_file_path(path: str) -> Tuple[bool, Optional[str]]:

@@ -578,6 +578,8 @@ async def set_profile_channels(
 # GENERATION ENDPOINTS
 # ============================================
 
+from .utils.languages import map_to_tts_language, map_to_stt_language
+
 @app.post("/generate", response_model=models.GenerationResponse)
 async def generate_speech(
     data: models.GenerationRequest,
@@ -636,7 +638,8 @@ async def generate_speech(
             )
 
         # Load (or switch to) the requested model before building the voice prompt
-        await tts_model.load_model_async(model_size)
+        # This now also handles loading language-specific LoRA adapters
+        await tts_model.load_model_async(model_size, data.language)
 
         # Create voice prompt from profile (model is already loaded with correct size)
         voice_prompt = await profiles.create_voice_prompt_for_profile(
@@ -644,10 +647,13 @@ async def generate_speech(
             db,
         )
 
+        # Map language to one supported by TTS model
+        tts_lang = map_to_tts_language(data.language)
+
         audio, sample_rate = await tts_model.generate(
             data.text,
             voice_prompt,
-            data.language,
+            tts_lang,
             data.seed,
             data.instruct,
         )
@@ -711,15 +717,19 @@ async def stream_speech(
             detail=f"Model {model_size} is not downloaded yet. Use /generate to trigger a download.",
         )
 
-    # Load the correct model before building the voice prompt (fixes issue #96)
-    await tts_model.load_model_async(model_size)
+    # Load the correct model before building the voice prompt
+    # This now also handles loading language-specific LoRA adapters
+    await tts_model.load_model_async(model_size, data.language)
 
     voice_prompt = await profiles.create_voice_prompt_for_profile(data.profile_id, db)
+
+    # Map language to one supported by TTS model
+    tts_lang = map_to_tts_language(data.language)
 
     audio, sample_rate = await tts_model.generate(
         data.text,
         voice_prompt,
-        data.language,
+        tts_lang,
         data.seed,
         data.instruct,
     )
@@ -960,7 +970,7 @@ async def transcribe_audio(
                 }
             )
 
-        text = await whisper_model.transcribe(tmp_path, language)
+        text = await whisper_model.transcribe(tmp_path, map_to_stt_language(language))
         
         return models.TranscriptionResponse(
             text=text,

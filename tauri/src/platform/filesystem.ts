@@ -1,7 +1,20 @@
 import type { PlatformFilesystem, FileFilter } from '@/platform/types';
+import { hasTauriRuntime } from './runtime';
 
 export const tauriFilesystem: PlatformFilesystem = {
   async saveFile(filename: string, blob: Blob, filters?: FileFilter[]) {
+    if (!hasTauriRuntime()) {
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(anchor);
+      return;
+    }
+
     const { save } = await import('@tauri-apps/plugin-dialog');
     const { writeFile } = await import('@tauri-apps/plugin-fs');
 

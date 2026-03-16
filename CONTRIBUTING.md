@@ -64,12 +64,12 @@ Thank you for your interest in contributing to Voicebox! This document provides 
    venv\Scripts\activate  # On Windows
    
    # Install Python dependencies
-   pip install -r requirements.txt
+   pip install -r backend/requirements.txt
    
    # Install MLX dependencies (Apple Silicon only - for faster inference)
    # On Apple Silicon, this enables native Metal acceleration
    if [[ $(uname -m) == "arm64" ]]; then
-     pip install -r requirements-mlx.txt
+     pip install -r backend/requirements-mlx.txt
    fi
    
    # Install Qwen3-TTS (required for voice synthesis)

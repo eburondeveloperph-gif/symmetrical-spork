@@ -2,16 +2,17 @@
 Pydantic models for request/response validation.
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional, List
 from datetime import datetime
+from typing import Optional, List
+
+from pydantic import BaseModel, Field
 
 
 class VoiceProfileCreate(BaseModel):
     """Request model for creating a voice profile."""
     name: str = Field(..., min_length=1, max_length=100)
     description: Optional[str] = Field(None, max_length=500)
-    language: str = Field(default="en", pattern="^(zh|en|ja|ko|de|fr|ru|pt|es|it)$")
+    language: str = Field(default="en", min_length=2, max_length=50)
 
 
 class VoiceProfileResponse(BaseModel):
@@ -25,6 +26,7 @@ class VoiceProfileResponse(BaseModel):
     updated_at: datetime
 
     class Config:
+        """Pydantic configuration."""
         from_attributes = True
 
 
@@ -46,6 +48,7 @@ class ProfileSampleResponse(BaseModel):
     reference_text: str
 
     class Config:
+        """Pydantic configuration."""
         from_attributes = True
 
 
@@ -53,7 +56,7 @@ class GenerationRequest(BaseModel):
     """Request model for voice generation."""
     profile_id: str
     text: str = Field(..., min_length=1, max_length=5000)
-    language: str = Field(default="en", pattern="^(zh|en|ja|ko|de|fr|ru|pt|es|it)$")
+    language: str = Field(default="en", min_length=2, max_length=50)
     seed: Optional[int] = Field(None, ge=0)
     model_size: Optional[str] = Field(default="1.7B", pattern="^(1\\.7B|0\\.6B)$")
     instruct: Optional[str] = Field(None, max_length=500)
@@ -72,6 +75,7 @@ class GenerationResponse(BaseModel):
     created_at: datetime
 
     class Config:
+        """Pydantic configuration."""
         from_attributes = True
 
 
@@ -97,6 +101,7 @@ class HistoryResponse(BaseModel):
     created_at: datetime
 
     class Config:
+        """Pydantic configuration."""
         from_attributes = True
 
 
@@ -108,7 +113,7 @@ class HistoryListResponse(BaseModel):
 
 class TranscriptionRequest(BaseModel):
     """Request model for audio transcription."""
-    language: Optional[str] = Field(None, pattern="^(en|zh)$")
+    language: Optional[str] = Field(None, min_length=2, max_length=50)
 
 
 class TranscriptionResponse(BaseModel):
@@ -191,6 +196,7 @@ class AudioChannelResponse(BaseModel):
     created_at: datetime
 
     class Config:
+        """Pydantic configuration."""
         from_attributes = True
 
 
@@ -220,6 +226,7 @@ class StoryResponse(BaseModel):
     item_count: int = 0
 
     class Config:
+        """Pydantic configuration."""
         from_attributes = True
 
 
@@ -245,11 +252,12 @@ class StoryItemDetail(BaseModel):
     generation_created_at: datetime
 
     class Config:
+        """Pydantic configuration."""
         from_attributes = True
 
 
 class StoryDetailResponse(BaseModel):
-    """Response model for story with items."""
+    """Response model for story detail including items."""
     id: str
     name: str
     description: Optional[str]
@@ -258,6 +266,7 @@ class StoryDetailResponse(BaseModel):
     items: List[StoryItemDetail] = []
 
     class Config:
+        """Pydantic configuration."""
         from_attributes = True
 
 
@@ -298,4 +307,5 @@ class StoryItemTrim(BaseModel):
 
 class StoryItemSplit(BaseModel):
     """Request model for splitting a story item."""
-    split_time_ms: int = Field(..., ge=0)  # Time within the clip to split at (relative to clip start)
+    # Time within the clip to split at (relative to clip start)
+    split_time_ms: int = Field(..., ge=0)

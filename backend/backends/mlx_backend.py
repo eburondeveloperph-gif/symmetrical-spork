@@ -15,6 +15,9 @@ from ..utils.hf_progress import HFProgressTracker, create_hf_progress_callback
 from ..utils.tasks import get_task_manager
 
 
+from ..utils.adapters import get_adapter_path
+
+
 class MLXTTSBackend:
     """MLX-based TTS backend using mlx-audio."""
     
@@ -22,6 +25,7 @@ class MLXTTSBackend:
         self.model = None
         self.model_size = model_size
         self._current_model_size = None
+        self._current_adapter_lang = None
     
     def is_loaded(self) -> bool:
         """Check if model is loaded."""
@@ -93,31 +97,32 @@ class MLXTTSBackend:
             print(f"[_is_model_cached] Error checking cache for {model_size}: {e}")
             return False
     
-    async def load_model_async(self, model_size: Optional[str] = None):
+    async def load_model_async(self, model_size: Optional[str] = None, language: Optional[str] = None):
         """
         Lazy load the MLX TTS model.
         
         Args:
             model_size: Model size to load (1.7B or 0.6B)
+            language: Optional language to load a specific LoRA adapter for
         """
         if model_size is None:
             model_size = self.model_size
             
-        # If already loaded with correct size, return
-        if self.model is not None and self._current_model_size == model_size:
+        # If already loaded with correct size and adapter, return
+        if self.model is not None and self._current_model_size == model_size and self._current_adapter_lang == language:
             return
         
-        # Unload existing model if different size requested
-        if self.model is not None and self._current_model_size != model_size:
+        # Unload existing model if different size or adapter requested
+        if self.model is not None and (self._current_model_size != model_size or self._current_adapter_lang != language):
             self.unload_model()
         
         # Run blocking load in thread pool
-        await asyncio.to_thread(self._load_model_sync, model_size)
+        await asyncio.to_thread(self._load_model_sync, model_size, language)
     
     # Alias for compatibility
     load_model = load_model_async
     
-    def _load_model_sync(self, model_size: str):
+    def _load_model_sync(self, model_size: str, language: Optional[str] = None):
         """Synchronous model loading."""
         try:
             # Get model path BEFORE importing mlx_audio
@@ -165,6 +170,22 @@ class MLXTTSBackend:
             # Load MLX model (downloads automatically)
             try:
                 self.model = load(model_path)
+                
+                # Load LoRA adapter if language is provided and adapter exists
+                if language:
+                    adapter_path = get_adapter_path(language)
+                    if adapter_path:
+                        print(f"Loading LoRA adapter for {language} from {adapter_path}")
+                        try:
+                            # MLX-audio models have an apply_adapter method or similar
+                            # If not, we might need to load weights manually into mlx.nn modules
+                            if hasattr(self.model, "apply_adapter"):
+                                self.model.apply_adapter(str(adapter_path))
+                                self._current_adapter_lang = language
+                            else:
+                                print(f"Warning: model type {type(self.model)} does not support apply_adapter")
+                        except Exception as e:
+                            print(f"Error loading LoRA adapter in MLX: {e}")
             finally:
                 # Exit the patch context
                 tracker_context.__exit__(None, None, None)
@@ -307,7 +328,8 @@ class MLXTTSBackend:
         Returns:
             Tuple of (audio_array, sample_rate)
         """
-        await self.load_model_async(None)
+        # Load model (and potentially its language-specific LoRA adapter)
+        await self.load_model_async(None, language)
 
         print(f"Generating audio for text: {text}")
 
@@ -334,6 +356,22 @@ class MLXTTSBackend:
                 print("Regenerating without voice prompt.")
                 ref_audio = None
             
+            # Map language to supported names in Qwen3-TTS
+            # Model expects full names like 'english', 'chinese', etc.
+            lang_map = {
+                "en": "english",
+                "zh": "chinese",
+                "ja": "japanese",
+                "ko": "korean",
+                "de": "german",
+                "fr": "french",
+                "ru": "russian",
+                "pt": "portuguese",
+                "es": "spanish",
+                "it": "italian",
+            }
+            mapped_lang = lang_map.get(language, "auto")
+
             # Check if model supports voice cloning via generate method
             # MLX API may support ref_audio parameter directly
             try:
@@ -344,17 +382,23 @@ class MLXTTSBackend:
                     sig = inspect.signature(self.model.generate)
                     if "ref_audio" in sig.parameters:
                         # Generate with voice cloning
-                        for result in self.model.generate(text, ref_audio=ref_audio, ref_text=ref_text):
+                        for result in self.model.generate(
+                            text, 
+                            ref_audio=ref_audio, 
+                            ref_text=ref_text,
+                            lang_code=mapped_lang,
+                            instruct=instruct,
+                        ):
                             audio_chunks.append(np.array(result.audio))
                             sample_rate = result.sample_rate
                     else:
                         # Fallback: generate without voice cloning
-                        for result in self.model.generate(text):
+                        for result in self.model.generate(text, lang_code=mapped_lang):
                             audio_chunks.append(np.array(result.audio))
                             sample_rate = result.sample_rate
                 else:
                     # No voice prompt, generate normally
-                    for result in self.model.generate(text):
+                    for result in self.model.generate(text, lang_code=mapped_lang):
                         audio_chunks.append(np.array(result.audio))
                         sample_rate = result.sample_rate
             except Exception as e:
@@ -555,7 +599,21 @@ class MLXSTTBackend:
             # The generate method accepts audio path directly
             decode_options = {}
             if language:
-                decode_options["language"] = language
+                # Map ISO codes to full names if needed by MLX Whisper
+                lang_map = {
+                    "en": "english",
+                    "zh": "chinese",
+                    "ja": "japanese",
+                    "ko": "korean",
+                    "de": "german",
+                    "fr": "french",
+                    "ru": "russian",
+                    "pt": "portuguese",
+                    "es": "spanish",
+                    "it": "italian",
+                    "nl": "dutch",
+                }
+                decode_options["language"] = lang_map.get(language, language)
 
             result = self.model.generate(str(audio_path), **decode_options)
 
